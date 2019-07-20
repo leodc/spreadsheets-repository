@@ -1,30 +1,18 @@
 var express = require("express");
 var router = express.Router();
-
-var multer = require("multer");
-var upload = multer({ dest: "data/" });
+var path = require("path");
 
 var xlsx = require("node-xlsx");
-
-
-function handleUpload(req, res, next){
-  var datasetId = req.file.filename;
-
-  // Parse a file
-  var worksheets = xlsx.parse('data/' + datasetId);
-
-  res.status(200).send(worksheets);
-}
-
+var uploader = require("../config/uploader");
 
 // uploader
-router.post('/upload', upload.single('userData'), handleUpload);
-
+router.post('/upload', uploader.single('userData'), function (req, res, next){
+  res.status(200).send( xlsx.parse( path.join(__dirname, "../data", req.file.filename) ) );
+});
 
 // index
 router.get('/', function(req, res) {
   res.render('index');
 });
-
 
 module.exports = router;
