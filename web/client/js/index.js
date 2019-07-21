@@ -4,15 +4,13 @@ var defaultHeadersRowCount = 1;
 
 $('#uploadForm').ajaxForm({
   beforeSerialize: function(arr, $form, options) {
-    $("#chargingDialog").modal("show");
+    // $("#chargingDialog").modal("show");
   },
   success: function(worksheets){
     window.worksheets = worksheets;
-    setTimeout(function () {
-      paintWorksheets();
+    paintWorksheets();
 
-      $("#chargingDialog").modal("hide");
-    }, 300);
+    // $("#chargingDialog").modal("hide");
   }
 });
 
@@ -58,17 +56,17 @@ function updateWorksheet(worksheetIndex){
       editableAux.push( [headerIndex+1, String(headerIndex+1)] );
     }
 
-    $('#dataTable' + worksheetIndex).Tabledit({
-      editButton: false,
-      removeButton: false,
-      saveButton: false,
-      restoreButton: false,
-      deleteButton: false,
-      columns: {
-        identifier: [0, fullnameColumn],
-        editable: editableAux
-      }
-    });
+    // $('#dataTable' + worksheetIndex).Tabledit({
+    //   editButton: false,
+    //   removeButton: false,
+    //   saveButton: false,
+    //   restoreButton: false,
+    //   deleteButton: false,
+    //   columns: {
+    //     identifier: [0, fullnameColumn],
+    //     editable: editableAux
+    //   }
+    // });
 
     $("#chargingDialog").modal("hide");
   }, 400);
@@ -83,6 +81,8 @@ function buildHeaders(worksheetIndex, config){
 
   var headerRows = worksheets[worksheetIndex].data.slice(0, config.headersRowValue);
 
+  var columns = [];
+  var dataJson = [];
   var headers = [], value, indexNoName=0;
   for (var i = 0; i < headerRows.length; i++) {
     for (var j = 0; j < headerRows[i].length; j++) {
@@ -101,7 +101,27 @@ function buildHeaders(worksheetIndex, config){
     }
   }
 
+  for (var header of headers) {
+    columns.push({field: header, title: header});
+  }
+
+
+  for (var i=config.headersRowValue; i < worksheets[worksheetIndex].data.length; i++) {
+    var record = worksheets[worksheetIndex].data[i];
+    var recordAux = {id: i};
+
+    for (var j = 0; j < headers.length; j++) {
+      var header = headers[j];
+      recordAux[ header ] = (record.length > j) ? record[j]:"";
+    }
+
+    dataJson.push(recordAux);
+  }
+
   worksheets[worksheetIndex].headers = headers;
+
+  worksheets[worksheetIndex].columns = columns;
+  worksheets[worksheetIndex].dataJson = dataJson;
 }
 
 function paintWorksheets(){
@@ -126,17 +146,70 @@ function paintWorksheets(){
       editableAux.push( [headerIndex+1, String(headerIndex+1)] );
     }
 
-    $('#dataTable' + index).Tabledit({
-      editButton: false,
-      removeButton: false,
-      saveButton: false,
-      restoreButton: false,
-      deleteButton: false,
-      columns: {
-        identifier: [0, fullnameColumn],
-        editable: editableAux
-      }
+    // $('#dataTable' + index).Tabledit({
+    //   editButton: false,
+    //   removeButton: false,
+    //   saveButton: false,
+    //   restoreButton: false,
+    //   deleteButton: false,
+    //   columns: {
+    //     identifier: [0, fullnameColumn],
+    //     editable: editableAux
+    //   }
+    // });
+
+    // table = new aTable('#dataTable' + index, {
+    //  lang:'es',
+    //  mark:{
+    //    btn:{
+    //      group:'acms-admin-btn-group acms-admin-btn-group-inline',
+    //      item:'acms-admin-btn',
+    //      itemActive:'acms-admin-btn acms-admin-btn-active'
+    //    }
+    //  },
+    //  selector:{
+    //    option:[
+    //    ]
+    //  }
+    // });
+    // table.afterRendered =
+    // table.afterEntered = function(){
+    //  document.querySelector('.test').innerText = this.getTable();
+    //  document.querySelector('.markdown').innerText = this.getMarkdown();
+    // }
+    // table.afterRendered();
+
+    $('#dataTable' + index).bootstrapTable({
+      columns: worksheets[index].columns,
+      data: worksheets[index].dataJson,
+      pagination: true,
+      search: true
     });
+
+    $('#dataTable' + index).editableTableWidget();
+
+
+    // $('#dataTable' + index).Tabledit({
+    //   editButton: false,
+    //   removeButton: false,
+    //   saveButton: false,
+    //   restoreButton: false,
+    //   deleteButton: false,
+    //   columns: {
+    //     identifier: [0, fullnameColumn],
+    //     editable: editableAux
+    //   }
+    // });
+
+    $('#dataTable' + index).on('draw.dt', function() {
+      $('#dataTable' + index).editableTableWidget();
+    });
+
+    $('#dataTable' + index).on('load-success.bs.table', function() {
+      $('#dataTable' + index).editableTableWidget();
+    });
+
+
 
     index++;
   }
@@ -166,7 +239,13 @@ function buildControls(worksheetIndex, config={"headersRowValue": 1, "nameColumn
       </select>
     </div>
 
-    <button class="btn btn-primary float-right" type="button" onclick="updateWorksheet(` + worksheetIndex + `);">Actualizar</button>
+    <div class="float-right">
+    <button class="btn btn-info" type="button" onclick="updateWorksheet(` + worksheetIndex + `);">Actualizar tabla</button>
+
+    <button type="button" class="btn btn-info"><i class="fas fa-search"></i></button>
+    <button type="button" class="btn btn-info"><i class="fas fa-play"></i></button>
+
+    </div>
     <div class="clearfix mb-4"></div>
 
   </div>
@@ -181,61 +260,64 @@ function buildView(worksheetIndex){
   var headers = worksheets[worksheetIndex].headers;
   var headersRowCounter = ($("#headersRowCounter" + worksheetIndex).length>0) ? parseInt($("#headersRowCounter" + worksheetIndex).val()):defaultHeadersRowCount;
 
-  var table = `
-  <div>
-    <table id='dataTable` + worksheetIndex + `' class="table table-striped table-bordered table-sm">
-      <thead>
-        <tr>`;
+  var table = `<table id='dataTable` + worksheetIndex + `' class="table table-striped table-bordered table-sm"></table>`;
 
-  for (var i = 0; i < headers.length; i++) {
-    if ( i == 0 ){
-      table += "<th>" + fullnameColumn + "</th>";
-      table += "<th>" + matchColumn + "</th>";
-    }
-
-    table += "<th>" + headers[i] + "</th>";
-  }
-
-  table += "</tr></thead>";
-  table += "<tbody>";
-
-  for (var i = headersRowCounter; i < data.length; i++) {
-    table += "<tr>";
-
-
-    for (var j = 0; j < headers.length; j++) {
-      if(j==0){
-        // print full name
-        var fullname = "";
-        if($("#nameColumns" + worksheetIndex).length > 0){
-          for (var headerName of $("#nameColumns" + worksheetIndex).val()) {
-            fullname += cleanName(data[i][headers.indexOf(headerName)]) + " ";
-          }
-        }
-
-        table += "<td>" + cleanName(fullname) + "</td>";
-
-        // print match
-        if(window.matchs){
-          table += "<td>" + window.matchs[fullname] + "</td>";
-        }else{
-          table += "<td></td>";
-        }
-      }
-
-      value = data[i][j] ? data[i][j]:"";
-      table += "<td>" + cleanValue(value) + "</td>";
-    }
-
-    table += "</tr>";
-  }
-
-  table += "</tbody>";
-  table += "</table></div>";
+  // class="table table-striped table-bordered table-sm"
+  // var table = `
+  // <div>
+  //   <table id='dataTable` + worksheetIndex + `'>
+  //     <thead>
+  //       <tr>`;
+  //
+  // for (var i = 0; i < headers.length; i++) {
+  //   if ( i == 0 ){
+  //     table += "<th>" + fullnameColumn + "</th>";
+  //     table += "<th>" + matchColumn + "</th>";
+  //   }
+  //
+  //   table += "<th>" + headers[i] + "</th>";
+  // }
+  //
+  // table += "</tr></thead>";
+  // table += "<tbody>";
+  //
+  // for (var i = headersRowCounter; i < data.length; i++) {
+  //   table += "<tr>";
+  //
+  //
+  //   for (var j = 0; j < headers.length; j++) {
+  //     if(j==0){
+  //       // print full name
+  //       var fullname = "";
+  //       if($("#nameColumns" + worksheetIndex).length > 0){
+  //         for (var headerName of $("#nameColumns" + worksheetIndex).val()) {
+  //           fullname += cleanName(data[i][headers.indexOf(headerName)]) + " ";
+  //         }
+  //       }
+  //
+  //       table += "<td>" + cleanName(fullname) + "</td>";
+  //
+  //       // print match
+  //       if(window.matchs){
+  //         table += "<td>" + window.matchs[fullname] + "</td>";
+  //       }else{
+  //         table += "<td></td>";
+  //       }
+  //     }
+  //
+  //     value = data[i][j] ? data[i][j]:"";
+  //     table += "<td>" + cleanValue(value) + "</td>";
+  //   }
+  //
+  //   table += "</tr>";
+  // }
+  //
+  // table += "</tbody>";
+  // table += "</table></div>";
 
   return table;
 }
 
 function findMatches(){
-  
+
 }
