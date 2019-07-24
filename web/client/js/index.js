@@ -146,70 +146,27 @@ function paintWorksheets(){
       editableAux.push( [headerIndex+1, String(headerIndex+1)] );
     }
 
-    // $('#dataTable' + index).Tabledit({
-    //   editButton: false,
-    //   removeButton: false,
-    //   saveButton: false,
-    //   restoreButton: false,
-    //   deleteButton: false,
-    //   columns: {
-    //     identifier: [0, fullnameColumn],
-    //     editable: editableAux
-    //   }
-    // });
-
-    // table = new aTable('#dataTable' + index, {
-    //  lang:'es',
-    //  mark:{
-    //    btn:{
-    //      group:'acms-admin-btn-group acms-admin-btn-group-inline',
-    //      item:'acms-admin-btn',
-    //      itemActive:'acms-admin-btn acms-admin-btn-active'
-    //    }
-    //  },
-    //  selector:{
-    //    option:[
-    //    ]
-    //  }
-    // });
-    // table.afterRendered =
-    // table.afterEntered = function(){
-    //  document.querySelector('.test').innerText = this.getTable();
-    //  document.querySelector('.markdown').innerText = this.getMarkdown();
-    // }
-    // table.afterRendered();
-
     $('#dataTable' + index).bootstrapTable({
       columns: worksheets[index].columns,
       data: worksheets[index].dataJson,
       pagination: true,
-      search: true
+      search: true,
+      onDblClickCell: function (field, value, row, element) {
+        var activeWorksheet = parseInt($(".nav-link.active")[0].hash.replace("#worksheet",""));
+
+        $('#editValueDialog').off('show.bs.modal');
+        $('#editValueDialog').on('show.bs.modal', function (event) {
+          $(this).find('#editValueLabel').text(field);
+          $(this).find('#editValueInput').val(value);
+
+          $('#editValueAcceptButton').data("row", element[0].parentElement.dataset.index);
+          $('#editValueAcceptButton').data("field", field);
+          $('#editValueAcceptButton').data("index", activeWorksheet);
+        })
+
+        $("#editValueDialog").modal("show");
+      }
     });
-
-    $('#dataTable' + index).editableTableWidget();
-
-
-    // $('#dataTable' + index).Tabledit({
-    //   editButton: false,
-    //   removeButton: false,
-    //   saveButton: false,
-    //   restoreButton: false,
-    //   deleteButton: false,
-    //   columns: {
-    //     identifier: [0, fullnameColumn],
-    //     editable: editableAux
-    //   }
-    // });
-
-    $('#dataTable' + index).on('draw.dt', function() {
-      $('#dataTable' + index).editableTableWidget();
-    });
-
-    $('#dataTable' + index).on('load-success.bs.table', function() {
-      $('#dataTable' + index).editableTableWidget();
-    });
-
-
 
     index++;
   }
@@ -262,10 +219,9 @@ function buildView(worksheetIndex){
 
   var table = `<table id='dataTable` + worksheetIndex + `' class="table table-striped table-bordered table-sm"></table>`;
 
-  // class="table table-striped table-bordered table-sm"
   // var table = `
   // <div>
-  //   <table id='dataTable` + worksheetIndex + `'>
+  //   <table id='dataTable` + worksheetIndex + `' class="table table-striped table-bordered table-sm" data-pagination="true" data-unique-id="true">
   //     <thead>
   //       <tr>`;
   //
@@ -306,7 +262,7 @@ function buildView(worksheetIndex){
   //     }
   //
   //     value = data[i][j] ? data[i][j]:"";
-  //     table += "<td>" + cleanValue(value) + "</td>";
+  //     table += "<td onclick='updateCell(" + worksheetIndex + "," + i + "," + j + ");'>" + cleanValue(value) + "</td>";
   //   }
   //
   //   table += "</tr>";
@@ -318,6 +274,13 @@ function buildView(worksheetIndex){
   return table;
 }
 
-function findMatches(){
+function updateCellValue(){
+  var indexRow = parseInt($('#editValueAcceptButton').data("row"));
+  var field = $('#editValueAcceptButton').data("field");
+  var activeWorksheet = $('#editValueAcceptButton').data("index");
+  var value = $('#editValueInput').val();
 
+  $('#dataTable' + activeWorksheet).bootstrapTable('updateCell', {index: indexRow, field: field, value: value});
+
+  $("#editValueDialog").modal("hide");
 }

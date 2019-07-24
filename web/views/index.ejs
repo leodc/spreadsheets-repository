@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
 	<meta charset="utf-8">
@@ -47,6 +47,24 @@
 		</div><!-- /.modal-dialog -->
 	</div><!-- /.modal -->
 
+
+	<!-- Edit value -->
+	<div class="modal fade" tabindex="-1" role="dialog" id="editValueDialog">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-body">
+					<div class="form-group">
+					  <label for="editValueInput" id="editValueLabel"></label>
+					  <input type="text" class="form-control" id="editValueInput">
+					</div>
+				</div>
+				<div class="modal-footer">
+        	<button type="button" class="btn btn-primary" onclick="updateCellValue(this);" id="editValueAcceptButton">Aceptar</button>
+      	</div>
+			</div><!-- /.modal-content -->
+		</div><!-- /.modal-dialog -->
+	</div><!-- /.modal -->
+
 	<!-- jquery -->
 	<script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
 	<script src="/plugins/jquery.form.js"></script>
@@ -64,7 +82,7 @@
 
 	<script src="/plugins/latinize.js"></script>
 
-	<script src="/plugins/mindmup-editabletable.js"></script>
+	<!-- <script src="/plugins/mindmup-editabletable.js"></script> -->
 
 	<script src="/js/index.js"></script>
 </body>
