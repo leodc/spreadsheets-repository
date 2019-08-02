@@ -11,9 +11,14 @@ $('#uploadForm').ajaxForm({
 });
 
 function getConfig(worksheetIndex){
+  var selectedNameColumnsList = [];
+  $.each($('#selectedNameColumns0').find('li'), function() {
+    selectedNameColumnsList.push($(this).text());
+  });
+
   var config= {
     headersRowValue: ($("#headersRowCounter" + worksheetIndex).length>0) ? parseInt($("#headersRowCounter" + worksheetIndex).val()):defaultHeadersRowCount,
-    nameColumnsValue: ($("#nameColumns" + worksheetIndex).length>0) ? $("#nameColumns" + worksheetIndex).val():[],
+    nameColumnsValue: selectedNameColumnsList,
     linkColumnsValue: ($("#linkColumns" + worksheetIndex).length>0) ? $("#linkColumns" + worksheetIndex).val():[],
     referenceColumnsValue: ($("#referenceColumns" + worksheetIndex).length>0) ? $("#referenceColumns" + worksheetIndex).val():[]
   };
@@ -21,14 +26,7 @@ function getConfig(worksheetIndex){
   return config;
 }
 
-function updateWorksheet(worksheetIndex){
-  console.log("update worksheet " + worksheetIndex);
-
-  parseWorksheet(worksheetIndex);
-
-  $("#controls" + worksheetIndex).replaceWith( buildControls(worksheetIndex) );
-  $("#containerTable" + worksheetIndex).replaceWith( buildTable(worksheetIndex) );
-
+function initWorksheet(worksheetIndex){
   $("#dataTable" + worksheetIndex).bootstrapTable({
     columns: worksheets[worksheetIndex].columns,
     data: worksheets[worksheetIndex].dataJson,
@@ -50,6 +48,21 @@ function updateWorksheet(worksheetIndex){
       $("#editValueDialog").modal("show");
     }
   });
+
+  $( "#nameColumns" + worksheetIndex + ", #selectedNameColumns" + worksheetIndex ).sortable({
+      connectWith: ".connectedSortable"+worksheetIndex
+  }).disableSelection();
+}
+
+function updateWorksheet(worksheetIndex){
+  console.log("update worksheet " + worksheetIndex);
+
+  parseWorksheet(worksheetIndex);
+
+  $("#controls" + worksheetIndex).replaceWith( buildControls(worksheetIndex) );
+  $("#containerTable" + worksheetIndex).replaceWith( buildTable(worksheetIndex) );
+
+  initWorksheet(worksheetIndex);
 }
 
 function loadWorksheets(){
@@ -65,27 +78,7 @@ function loadWorksheets(){
     $("#tab-headers").append(title);
     $("#tab-body").append(content);
 
-    $("#dataTable" + index).bootstrapTable({
-      columns: worksheets[index].columns,
-      data: worksheets[index].dataJson,
-      pagination: true,
-      search: true,
-      onClickCell: function (field, value, row, element) {
-        var activeWorksheet = parseInt($(".nav-link.active")[0].hash.replace("#worksheet",""));
-
-        $("#editValueDialog").off("show.bs.modal");
-        $("#editValueDialog").on("show.bs.modal", function (event) {
-          $(this).find("#editValueLabel").text(field);
-          $(this).find("#editValueInput").val(value);
-
-          $("#editValueAcceptButton").data("row", element[0].parentElement.dataset.index);
-          $("#editValueAcceptButton").data("field", field);
-          $("#editValueAcceptButton").data("index", activeWorksheet);
-        });
-
-        $("#editValueDialog").modal("show");
-      }
-    });
+    initWorksheet(index);
   }
 }
 

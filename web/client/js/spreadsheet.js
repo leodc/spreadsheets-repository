@@ -46,6 +46,14 @@ function parseWorksheet(worksheetIndex){
     row = worksheets[worksheetIndex].data[i];
     parsedRow = {id: i};
 
+    var fullname = "";
+    if( config.nameColumnsValue.length > 0 ){
+      for (var k = 0; k < config.nameColumnsValue.length; k++) {
+        fullname += row[ headers.indexOf(config.nameColumnsValue[k])-2 ] + " ";
+      }
+    }
+    parsedRow[ fullnameColumn ] = cleanName(fullname);
+
     for (j = 2; j < headers.length; j++) {
       parsedRow[ headers[j] ] = cleanValue(row[j-2]);
     }
@@ -71,27 +79,37 @@ function buildControls(worksheetIndex){
       <input type="number" min="1" class="form-control" id="headersRowCounter` + worksheetIndex + `" value="` + config.headersRowValue + `">
     </div>
 
+    Columnas de nombre:
     <div class="row">
-
       <div class="col">
-        <div class="form-group">
-          <label for="nameColumns` + worksheetIndex + `">Columnas de nombre:</label>
-          <select multiple class="form-control" id="nameColumns` + worksheetIndex + `">
+        <ul class="sortable connectedSortable` + worksheetIndex + `" id="nameColumns` + worksheetIndex + `">
   `;
 
+  var selectedNamesItems = "";
+  for (var nameColumn of config.nameColumnsValue) {
+    selectedNamesItems += "<li>" + nameColumn + "</li>";
+  }
   for (var header of worksheets[worksheetIndex].headers) {
     if(header == fullnameColumn || header == matchColumn){
       continue;
     }
-    var selected = (config.nameColumnsValue.indexOf(header)>-1) ? "selected":"";
-    controls += "<option " + selected + ">" + header + "</option>";
+
+    if( config.nameColumnsValue.indexOf(header) == -1 ){
+      controls += "<li>" + header + "</li>";
+    }
   }
 
   controls += `
-          </select>
-        </div>
+        </ul>
       </div>
 
+      <div class="col">
+        <ul class="sortable connectedSortable` + worksheetIndex + `" id="selectedNameColumns` + worksheetIndex + `">` + selectedNamesItems + `</ul>
+        <small>**Orden correcto:<br>[Apellido paterno]<br>[Apellido materno]<br>[Nombres]</small>
+      </div>
+    </div>
+
+    <div class="row mt-2">
       <div class="col">
         <div class="form-group">
           <label for="linkColumns` + worksheetIndex + `">Columnas con enlaces externos:</label>
