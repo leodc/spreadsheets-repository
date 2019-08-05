@@ -21,7 +21,7 @@
 			<div class="jumbotron py-3 mb-2">
 				<form id="uploadForm" action="/upload" method="post" enctype="multipart/form-data">
 					<div class="input-group">
-					  <div class="custom-file" data-toggle="tooltip" title="Antes de subir un archivo asegurate que los encabezados solo ocupen una linea.">
+					  <div class="custom-file">
 							<label class="custom-file-label" for="userData">Selecciona un archivo</label>
 					    <input class="custom-file-input" type="file" id="userData" name="userData">
 					  </div>
@@ -29,8 +29,9 @@
 							<button class="btn btn-primary" type="submit">Enviar</button>
 					  </div>
 					</div>
-
 				</form>
+
+				<small>* Antes de subir un archivo asegurate que los encabezados ocupen solo una linea.</small>
 			</div>
 		</div>
 

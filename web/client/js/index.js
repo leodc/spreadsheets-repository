@@ -2,6 +2,9 @@ $(function () {
   $('#uploadForm').ajaxForm({
     beforeSerialize: function(arr, $form, options) {
       $("#chargingDialog").modal("show");
+
+      $("#tab-body").html("");
+      $("#tab-headers").html("");
     },
     success: function(worksheets){
       window.worksheets = worksheets;
@@ -55,21 +58,23 @@ function initWorksheet(worksheetIndex){
       $("#editValueDialog").modal("show");
     }
   });
-
-  $( "#nameColumns" + worksheetIndex + ", #selectedNameColumns" + worksheetIndex ).sortable({
-      connectWith: ".connectedSortable"+worksheetIndex
-  }).disableSelection();
 }
 
-function updateWorksheet(worksheetIndex){
-  console.log("update worksheet " + worksheetIndex);
+function buildFullName(worksheetIndex){
+  console.log("building names " + worksheetIndex);
 
-  parseWorksheet(worksheetIndex);
+  var config = getConfig(worksheetIndex);
 
-  $("#controls" + worksheetIndex).replaceWith( buildControls(worksheetIndex) );
-  $("#containerTable" + worksheetIndex).replaceWith( buildTable(worksheetIndex) );
+  for (var record of worksheets[worksheetIndex].dataJson) {
+    // build full name
+    var fullname = "";
+    for (var i = 0; i < config.nameColumnsValue.length; i++) {
+      fullname += record[ config.nameColumnsValue[i] ];
+    }
+    record[ fullnameColumn ] = cleanName(fullname);
+  }
 
-  initWorksheet(worksheetIndex);
+  $("#dataTable" + worksheetIndex).bootstrapTable("load", worksheets[worksheetIndex].dataJson);
 }
 
 function loadWorksheets(){
@@ -84,6 +89,11 @@ function loadWorksheets(){
 
     $("#tab-headers").append(title);
     $("#tab-body").append(content);
+
+    $( "#nameColumns" + index + ", #selectedNameColumns" + index ).sortable({
+        connectWith: ".connectedSortable"+index,
+        placeholder: "ui-state-highlight"
+    }).disableSelection();
 
     initWorksheet(index);
   }

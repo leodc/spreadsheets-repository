@@ -39,14 +39,6 @@ function parseWorksheet(worksheetIndex){
     row = worksheets[worksheetIndex].data[i];
     parsedRow = {id: i};
 
-    var fullname = "";
-    if( config.nameColumnsValue.length > 0 ){
-      for (var k = 0; k < config.nameColumnsValue.length; k++) {
-        fullname += row[ headers.indexOf(config.nameColumnsValue[k])-2 ] + " ";
-      }
-    }
-    parsedRow[ fullnameColumn ] = cleanName(fullname);
-
     for (j = 2; j < headers.length; j++) {
       parsedRow[ headers[j] ] = cleanValue(row[j-2]);
     }
@@ -99,7 +91,7 @@ function buildControls(worksheetIndex){
     <div class="row mt-2">
       <div class="col">
         <div class="form-group">
-          <label data-toggle="tooltip" title="Columnas con ligas a internet" for="linkColumns` + worksheetIndex + `">Columnas con enlaces externos: <i class="fas fa-question-circle text-secondary"></i></label>
+          <label for="linkColumns` + worksheetIndex + `">Columnas con enlaces externos:</label>
           <select multiple class="form-control" id="linkColumns` + worksheetIndex + `">
   `;
 
@@ -137,10 +129,16 @@ function buildControls(worksheetIndex){
     </div>
 
     <div class="float-right">
-      <button class="btn btn-info" type="button" onclick="updateWorksheet(` + worksheetIndex + `);">Actualizar tabla</button>
-      <button type="button" class="btn btn-info"><i class="fas fa-search"></i></button>
-      <button type="button" class="btn btn-info"><i class="fas fa-play"></i></button>
+      <button class="btn btn-info" type="button" onclick="buildFullName(` + worksheetIndex + `);">Generar nombres</button>
+      <button type="button" class="btn btn-info">Obtener coincidencias</button>
     </div>
+
+    <div class="clearfix"></div>
+
+    <div class="float-right">
+      <button type="button" class="btn btn-primary mt-1 float-right">Agregar a la base de datos</button>
+    </div>
+
     <div class="clearfix mb-4"></div>
   </div>
   `;
