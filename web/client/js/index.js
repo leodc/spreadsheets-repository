@@ -1,14 +1,19 @@
-$('#uploadForm').ajaxForm({
-  beforeSerialize: function(arr, $form, options) {
-    $("#chargingDialog").modal("show");
-  },
-  success: function(worksheets){
-    window.worksheets = worksheets;
-    loadWorksheets();
+$(function () {
+  $('#uploadForm').ajaxForm({
+    beforeSerialize: function(arr, $form, options) {
+      $("#chargingDialog").modal("show");
+    },
+    success: function(worksheets){
+      window.worksheets = worksheets;
+      loadWorksheets();
 
-    $("#chargingDialog").modal("hide");
-  }
-});
+      $("#chargingDialog").modal("hide");
+    }
+  });
+
+  $('[data-toggle="tooltip"]').tooltip();
+})
+
 
 function getConfig(worksheetIndex){
   var selectedNameColumnsList = [];

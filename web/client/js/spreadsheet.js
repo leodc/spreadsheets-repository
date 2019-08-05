@@ -66,7 +66,7 @@ function buildControls(worksheetIndex){
   var controls = `
   <div class='container' id='controls` + worksheetIndex + `'>
 
-    Columnas de nombre:
+    <span data-toggle="tooltip" title="Arrastra los encabezados de izquierda a derecha para seleccionarlos">Columnas de nombre: <i class="fas fa-question-circle text-secondary"></i></span>
     <div class="row">
       <div class="col">
         <ul class="sortable connectedSortable` + worksheetIndex + `" id="nameColumns` + worksheetIndex + `">
@@ -99,7 +99,7 @@ function buildControls(worksheetIndex){
     <div class="row mt-2">
       <div class="col">
         <div class="form-group">
-          <label for="linkColumns` + worksheetIndex + `">Columnas con enlaces externos:</label>
+          <label data-toggle="tooltip" title="Columnas con ligas a internet" for="linkColumns` + worksheetIndex + `">Columnas con enlaces externos: <i class="fas fa-question-circle text-secondary"></i></label>
           <select multiple class="form-control" id="linkColumns` + worksheetIndex + `">
   `;
 
