@@ -7,42 +7,35 @@ var titleTemplate = "<li class='nav-item'><a class='nav-link {{added_class}}' da
 var contentTemplate = "<div id='worksheet{{index}}' class='tab-pane {{added_class}}'>{{controls}} {{table_view}}</div>";
 
 function parseWorksheet(worksheetIndex){
+  console.log("parsing worksheet " + worksheetIndex);
+
   var config = getConfig(worksheetIndex);
 
   var indexNoName=0;
-  var headers = [];
-  var columns = [];
+  var headers = [matchColumn, fullnameColumn];
+  var columns = [
+    {field: matchColumn, title: matchColumn},
+    {field: fullnameColumn, title: fullnameColumn}
+  ];
   var dataJson = [];
   var header;
   var i,j;
 
   // build headers
-  var headerRows = worksheets[worksheetIndex].data.slice(0, config.headersRowValue);
-  for (i = 0; i < headerRows.length; i++) {
-    for (j = 0; j < headerRows[i].length; j++) {
-      header = headerRows[i][j] ? cleanHeader(headerRows[i][j]):"";
+  if(worksheets[worksheetIndex].data.length == 0){
+    console.log("no se encontraron datos");
+  }else{
+    for (i = 0; i < worksheets[worksheetIndex].data[0].length; i++) {
+      header = worksheets[worksheetIndex].data[0][i] ? cleanHeader(worksheets[worksheetIndex].data[0][i]):(emptyColumnName + "_" + (++indexNoName));
 
-      if(i==0){
-        if(header == "" ){
-          header =  emptyColumnName + "_" + (++indexNoName);
-        }
-        headers.push( header );
-      }else if(header != ""){
-        headers[j] += "_" + header;
-      }
+      headers.push(header);
+      columns.push({field: header, title: header});
     }
-  }
-
-  headers.unshift(matchColumn, fullnameColumn);
-
-  // get columns
-  for (header of headers) {
-    columns.push({field: header, title: header});
   }
 
   // parse data
   var row, parsedRow;
-  for (i = config.headersRowValue; i < worksheets[worksheetIndex].data.length; i++) {
+  for (i = 1; i < worksheets[worksheetIndex].data.length; i++) {
     row = worksheets[worksheetIndex].data[i];
     parsedRow = {id: i};
 
@@ -72,12 +65,6 @@ function buildControls(worksheetIndex){
 
   var controls = `
   <div class='container' id='controls` + worksheetIndex + `'>
-    <div class="input-group mb-2">
-      <div class="input-group-prepend">
-        <span class="input-group-text"># de lineas de encabezado: </span>
-      </div>
-      <input type="number" min="1" class="form-control" id="headersRowCounter` + worksheetIndex + `" value="` + config.headersRowValue + `">
-    </div>
 
     Columnas de nombre:
     <div class="row">

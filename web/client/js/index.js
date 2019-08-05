@@ -12,12 +12,11 @@ $('#uploadForm').ajaxForm({
 
 function getConfig(worksheetIndex){
   var selectedNameColumnsList = [];
-  $.each($('#selectedNameColumns0').find('li'), function() {
+  $.each($('#selectedNameColumns' + worksheetIndex).find('li'), function() {
     selectedNameColumnsList.push($(this).text());
   });
 
   var config= {
-    headersRowValue: ($("#headersRowCounter" + worksheetIndex).length>0) ? parseInt($("#headersRowCounter" + worksheetIndex).val()):defaultHeadersRowCount,
     nameColumnsValue: selectedNameColumnsList,
     linkColumnsValue: ($("#linkColumns" + worksheetIndex).length>0) ? $("#linkColumns" + worksheetIndex).val():[],
     referenceColumnsValue: ($("#referenceColumns" + worksheetIndex).length>0) ? $("#referenceColumns" + worksheetIndex).val():[]
@@ -107,7 +106,7 @@ function cleanHeader(header){
   if(!header)
     return "";
 
-  return latinize( String(header).toLocaleLowerCase().trim() ).replace(/[^ \w]|_|[0-9]/g, "").replace(/ /g,"_");
+  return latinize( String(header).toLocaleLowerCase().trim() ).replace(/[^\w]|[0-9]/g, "").replace(/ /g,"_");
 }
 
 function cleanValue(value){
