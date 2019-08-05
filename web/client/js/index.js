@@ -31,6 +31,9 @@ function initWorksheet(worksheetIndex){
     data: worksheets[worksheetIndex].dataJson,
     pagination: true,
     search: true,
+    showSearchClearButton: true,
+    paginationVAlign: "top",
+    searchAlign: "left",
     onClickCell: function (field, value, row, element) {
       var activeWorksheet = parseInt($(".nav-link.active")[0].hash.replace("#worksheet",""));
 
