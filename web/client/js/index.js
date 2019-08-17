@@ -69,7 +69,7 @@ function buildFullName(worksheetIndex){
     // build full name
     var fullname = "";
     for (var i = 0; i < config.nameColumnsValue.length; i++) {
-      fullname += record[ config.nameColumnsValue[i] ];
+      fullname += record[ config.nameColumnsValue[i] ] + " ";
     }
     record[ fullnameColumn ] = cleanName(fullname);
   }
@@ -123,14 +123,13 @@ function cleanName(fullname){
   if(!fullname)
     return "";
 
-  return latinize( String(fullname).toLocaleLowerCase().trim() ).replace(/[^ \w]|_|[0-9]/g, "");
+  return latinize( String(fullname).toLocaleLowerCase().trim() ).replace(/[^ \w]|[0-9]/g, "");
 }
 
 function cleanHeader(header){
   if(!header)
     return "";
-
-  return latinize( String(header).toLocaleLowerCase().trim() ).replace(/[^\w]|[0-9]/g, "").replace(/ /g,"_");
+  return latinize( String(header).toLocaleLowerCase().trim() ).replace(/ /g,"_").replace(/[^\w]|[0-9]/g, "");
 }
 
 function cleanValue(value){
