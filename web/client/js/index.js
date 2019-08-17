@@ -15,7 +15,7 @@ $(function () {
   });
 
   $('[data-toggle="tooltip"]').tooltip();
-})
+});
 
 
 function getConfig(worksheetIndex){
@@ -109,6 +109,12 @@ $("#editValueInput").keypress(function(e){
 
 $("#editValueDialog").on("shown.bs.modal", function (event) {
   $("#editValueInput").focus();
+});
+
+$("#userData").on("change",function(){
+  var fileName = $(this).val();
+  var splitedPath = fileName.split("\\");
+  $(this).next('.custom-file-label').html( splitedPath[ splitedPath.length - 1 ] );
 });
 
 

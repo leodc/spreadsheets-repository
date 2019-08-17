@@ -18,14 +18,15 @@
 	</head>
 	<body>
 		<div class="container py-0 my-0">
+
 			<div class="jumbotron py-3 mb-2">
 				<form id="uploadForm" action="/upload" method="post" enctype="multipart/form-data">
 					<div class="input-group">
 					  <div class="custom-file">
-							<label class="custom-file-label" for="userData">Selecciona un archivo</label>
-					    <input class="custom-file-input" type="file" id="userData" name="userData">
+					    <input type="file" class="custom-file-input" id="userData" name="userData" aria-describedby="userDataAddon01">
+					    <label class="custom-file-label" for="userData">Seleccionar archivo</label>
 					  </div>
-					  <div class="input-group-append">
+						<div class="input-group-append">
 							<button class="btn btn-primary" type="submit">Enviar</button>
 					  </div>
 					</div>
@@ -33,6 +34,7 @@
 
 				<small>* Antes de subir un archivo asegurate que los encabezados ocupen solo una linea.</small>
 			</div>
+
 		</div>
 
 		<ul class="nav nav-tabs container mb-4" id="tab-headers"></ul>
