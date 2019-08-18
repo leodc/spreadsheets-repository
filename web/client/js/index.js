@@ -1,5 +1,34 @@
 $(function () {
-  $('#uploadForm').ajaxForm({
+  $("#editValueInput").keypress(function(e){
+    if(e.which == 13){
+      $("#editValueAcceptButton").click();
+      return false;
+    }
+  });
+
+  $("#insertPersonsInput").keypress(function(e){
+    if(e.which == 13){
+      $("#insertPersonsAcceptButton").click();
+      return false;
+    }
+  });
+
+  $("#editValueDialog").on("shown.bs.modal", function (event) {
+    $("#editValueInput").focus();
+  });
+
+  $("#insertPersonsDialog").on("shown.bs.modal", function (event) {
+    window.selectedWorksheet = $(event.relatedTarget).data("index");
+    $("#insertPersonsInput").focus();
+  });
+
+  $("#userData").on("change",function(){
+    var fileName = $(this).val();
+    var splitedPath = fileName.split("\\");
+    $(this).next(".custom-file-label").html( splitedPath[ splitedPath.length - 1 ] );
+  });
+
+  $("#uploadForm").ajaxForm({
     beforeSerialize: function(arr, $form, options) {
       $("#chargingDialog").modal("show");
 
@@ -20,7 +49,7 @@ $(function () {
 
 function getConfig(worksheetIndex){
   var selectedNameColumnsList = [];
-  $.each($('#selectedNameColumns' + worksheetIndex).find('li'), function() {
+  $.each($("#selectedNameColumns" + worksheetIndex).find("li"), function() {
     selectedNameColumnsList.push($(this).text());
   });
 
@@ -64,15 +93,7 @@ function buildFullName(worksheetIndex){
   console.log("building names " + worksheetIndex);
 
   var config = getConfig(worksheetIndex);
-
-  for (var record of worksheets[worksheetIndex].dataJson) {
-    // build full name
-    var fullname = "";
-    for (var i = 0; i < config.nameColumnsValue.length; i++) {
-      fullname += record[ config.nameColumnsValue[i] ] + " ";
-    }
-    record[ fullnameColumn ] = cleanName(fullname);
-  }
+  worksheets[worksheetIndex].dataJson = utils.buildFullName(worksheets[worksheetIndex].dataJson, config);
 
   $("#dataTable" + worksheetIndex).bootstrapTable("load", worksheets[worksheetIndex].dataJson);
 }
@@ -97,44 +118,4 @@ function loadWorksheets(){
 
     initWorksheet(index);
   }
-}
-
-
-$("#editValueInput").keypress(function(e){
-  if(e.which == 13){
-    $("#editValueAcceptButton").click();
-    return false;
-  }
-});
-
-$("#editValueDialog").on("shown.bs.modal", function (event) {
-  $("#editValueInput").focus();
-});
-
-$("#userData").on("change",function(){
-  var fileName = $(this).val();
-  var splitedPath = fileName.split("\\");
-  $(this).next('.custom-file-label').html( splitedPath[ splitedPath.length - 1 ] );
-});
-
-
-// string clean functions
-function cleanName(fullname){
-  if(!fullname)
-    return "";
-
-  return latinize( String(fullname).toLocaleLowerCase().trim() ).replace(/[^ \w]|[0-9]/g, "");
-}
-
-function cleanHeader(header){
-  if(!header)
-    return "";
-  return latinize( String(header).toLocaleLowerCase().trim() ).replace(/ /g,"_").replace(/[^\w]|[0-9]/g, "");
-}
-
-function cleanValue(value){
-  if(!value)
-    return "";
-
-  return String(value).trim();
 }

@@ -1,8 +1,3 @@
-var fullnameColumn = "clean_name";
-var matchColumn = "matched_name";
-var defaultHeadersRowCount = 1;
-var emptyColumnName = "no_name";
-
 var titleTemplate = "<li class='nav-item'><a class='nav-link {{added_class}}' data-toggle='tab' href='#worksheet{{index}}'>{{worksheet_name}}</a></li>";
 var contentTemplate = "<div id='worksheet{{index}}' class='tab-pane {{added_class}}'>{{controls}} {{table_view}}</div>";
 
@@ -12,10 +7,10 @@ function parseWorksheet(worksheetIndex){
   var config = getConfig(worksheetIndex);
 
   var indexNoName=0;
-  var headers = [matchColumn, fullnameColumn];
+  var headers = [utils.matchColumn, utils.fullnameColumn];
   var columns = [
-    {field: matchColumn, title: matchColumn},
-    {field: fullnameColumn, title: fullnameColumn}
+    {field: utils.matchColumn, title: utils.matchColumn},
+    {field: utils.fullnameColumn, title: utils.fullnameColumn}
   ];
   var dataJson = [];
   var header;
@@ -26,7 +21,7 @@ function parseWorksheet(worksheetIndex){
     console.log("no se encontraron datos");
   }else{
     for (i = 0; i < worksheets[worksheetIndex].data[0].length; i++) {
-      header = worksheets[worksheetIndex].data[0][i] ? cleanHeader(worksheets[worksheetIndex].data[0][i]):(emptyColumnName + "_" + (++indexNoName));
+      header = worksheets[worksheetIndex].data[0][i] ? utils.cleanHeader(worksheets[worksheetIndex].data[0][i]):(utils.emptyColumnName + "_" + (++indexNoName));
 
       headers.push(header);
       columns.push({field: header, title: header});
@@ -40,7 +35,7 @@ function parseWorksheet(worksheetIndex){
     parsedRow = {id: i};
 
     for (j = 2; j < headers.length; j++) {
-      parsedRow[ headers[j] ] = cleanValue(row[j-2]);
+      parsedRow[ headers[j] ] = utils.cleanValue(row[j-2]);
     }
 
     dataJson.push(parsedRow);
@@ -69,7 +64,7 @@ function buildControls(worksheetIndex){
     selectedNamesItems += "<li>" + nameColumn + "</li>";
   }
   for (var header of worksheets[worksheetIndex].headers) {
-    if(header == fullnameColumn || header == matchColumn){
+    if(header == utils.fullnameColumn || header == utils.matchColumn){
       continue;
     }
 
@@ -96,7 +91,7 @@ function buildControls(worksheetIndex){
   `;
 
   for (var header of worksheets[worksheetIndex].headers) {
-    if(header == fullnameColumn || header == matchColumn){
+    if(header == utils.fullnameColumn || header == utils.matchColumn){
       continue;
     }
     var selected = (config.linkColumnsValue.indexOf(header)>-1) ? "selected":"";
@@ -115,7 +110,7 @@ function buildControls(worksheetIndex){
   `;
 
   for (var header of worksheets[worksheetIndex].headers) {
-    if(header == fullnameColumn || header == matchColumn){
+    if(header == utils.fullnameColumn || header == utils.matchColumn){
       continue;
     }
     var selected = (config.referenceColumnsValue.indexOf(header)>-1) ? "selected":"";
@@ -136,7 +131,7 @@ function buildControls(worksheetIndex){
     <div class="clearfix"></div>
 
     <div class="float-right">
-      <button type="button" class="btn btn-primary mt-1 float-right">Agregar a la base de datos</button>
+      <button type="button" class="btn btn-primary mt-1 float-right" data-toggle="modal" data-target="#insertPersonsDialog" data-index="` + worksheetIndex + `">Agregar a la base de datos</button>
     </div>
 
     <div class="clearfix mb-4"></div>

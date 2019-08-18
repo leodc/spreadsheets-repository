@@ -57,6 +57,32 @@
 		</div><!-- /.modal -->
 
 
+		<!-- insert to database -->
+		<div class="modal fade" tabindex="-1" role="dialog" id="insertPersonsDialog">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+
+					<div class="modal-header">
+						<h5 class="modal-title">Agregar a la base de datos</h5>
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						</button>
+					</div>
+
+					<div class="modal-body">
+						<div class="form-group">
+						  <label for="insertPersonsInput" id="insertPersonsLabel">¿A que sección se deben de agregar los datos?</label>
+						  <input type="text" class="form-control" id="insertPersonsInput">
+						</div>
+					</div>
+					<div class="modal-footer">
+	        	<button type="button" class="btn btn-primary" onclick="insertPersons();" id="insertPersonsAcceptButton">Aceptar</button>
+	      	</div>
+				</div><!-- /.modal-content -->
+			</div><!-- /.modal-dialog -->
+		</div><!-- /.modal -->
+
+
 		<!-- Edit value -->
 		<div class="modal fade" tabindex="-1" role="dialog" id="editValueDialog">
 			<div class="modal-dialog" role="document">
@@ -73,6 +99,8 @@
 				</div><!-- /.modal-content -->
 			</div><!-- /.modal-dialog -->
 		</div><!-- /.modal -->
+
+		<script src="/socket.io/socket.io.js"></script>
 
 		<!-- jquery -->
 		<script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
@@ -91,6 +119,8 @@
 		<!-- latinize -->
 		<script src="/plugins/latinize.js"></script>
 
+		<script src="/js/utils.js"></script>
+		<script src="/js/socket.js"></script>
 		<script src="/js/spreadsheet.js"></script>
 		<script src="/js/index.js"></script>
 	</body>
