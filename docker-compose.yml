@@ -15,9 +15,10 @@ services:
       - ./web/data:/usr/src/app/data
 
   mongo:
-    image: mongo:3.6
+    build: ./mongo
+    image: cide/mongo:3.6
     ports: 
       - 27017:27017
     volumes:
-      - ./mongo:/data/db
+      - ./mongo/data:/data/db
     restart: always
