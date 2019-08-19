@@ -22,6 +22,7 @@ app.use("/", indexRouter);
 io.on("connection", function(socket){
 
   socket.on("insertPersons", mongo.insertPersons);
+  socket.on("getMatches", mongo.getMatches);
 
 });
 

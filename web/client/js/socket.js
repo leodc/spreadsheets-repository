@@ -13,3 +13,12 @@ function insertPersons(){
     });
   }
 }
+
+function getMatches(indexSpredsheet){
+  console.log("Getting matches", indexSpredsheet);
+
+  socket.emit("getMatches", {persons: window.worksheets[indexSpredsheet].dataJson, config: getConfig(indexSpredsheet)}, function(result){
+    window.worksheets[indexSpredsheet].dataJson = result;
+    $("#dataTable" + indexSpredsheet).bootstrapTable("load", worksheets[indexSpredsheet].dataJson);
+  });
+}

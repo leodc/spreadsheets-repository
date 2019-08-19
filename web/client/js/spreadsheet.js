@@ -125,7 +125,7 @@ function buildControls(worksheetIndex){
 
     <div class="float-right">
       <button class="btn btn-info" type="button" onclick="buildFullName(` + worksheetIndex + `);">Generar nombres</button>
-      <button type="button" class="btn btn-info">Obtener coincidencias</button>
+      <button type="button" class="btn btn-info" onclick="getMatches(` + worksheetIndex + `);">Obtener coincidencias</button>
     </div>
 
     <div class="clearfix"></div>

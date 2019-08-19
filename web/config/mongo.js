@@ -8,6 +8,10 @@ var collection = process.env.MONGO_COLLECTION || "personas";
 
 var mongoUrl = "mongodb://" + host + ":" + port + "/";
 
+function isSamePerson(a, b){
+  return a[ utils.fullnameColumn ] === b[ utils.fullnameColumn ];
+}
+
 function insert(data, index, callback){
   if( index == data.persons.length ){
     callback("end");
@@ -18,11 +22,10 @@ function insert(data, index, callback){
       console.log("Omitiendo", person);
       insert(data, ++index, callback);
     }else{
-      var query = {$text: { $search: person[ utils.fullnameColumn ] }};
-
       MongoClient.connect(mongoUrl, { useNewUrlParser: true }, function(connectErr, client) {
         if(connectErr) return callback({details: "Error conectando a la base de datos", err: String(connectErr)}, null);
 
+        var query = {$text: { $search: person[ utils.fullnameColumn ] }};
         client.db(database).collection(collection).find(query).project({ score: { $meta: "textScore" } }).sort( { score: { $meta: "textScore" } } ).toArray(function(searchErr, result) {
           if(searchErr) return callback({details: "Error buscando coincidencias", person: person, query: query, err: String(searchErr)}, null);
 
@@ -61,7 +64,7 @@ function insert(data, index, callback){
             // update
             var update = false;
             for (var matchedPerson of result) {
-              if( matchedPerson[ utils.fullnameColumn ] === newPerson[ utils.fullnameColumn ] ){
+              if( isSamePerson(newPerson, matchedPerson) ){
                 if( matchedPerson[ data.config.propertyToInsert ] ){
                   matchedPerson[ data.config.propertyToInsert ] = matchedPerson[ data.config.propertyToInsert ].concat( newPerson[ data.config.propertyToInsert ] );
                 }else{
@@ -110,7 +113,56 @@ function insertPersons(data, callback){
   insert(data, 0, callback);
 }
 
+function getMatch(data, index, callback){
+  console.log("getting match", index, data.persons.length);
+
+  if( index == data.persons.length ){
+    callback(data.persons);
+  }else{
+    var person = data.persons[index];
+
+    if( person[ utils.fullnameColumn ] == "" ){
+      console.log("Omitiendo", person);
+      getMatch(data, ++index, callback);
+    }else{
+      var query = {$text: { $search: person[ utils.fullnameColumn ] }};
+
+      MongoClient.connect(mongoUrl, { useNewUrlParser: true }, function(connectErr, client) {
+        if(connectErr) return callback({details: "Error conectando a la base de datos", err: String(connectErr)}, null);
+
+        client.db(database).collection(collection).find(query).project({ score: { $meta: "textScore" } }).sort( { score: { $meta: "textScore" } } ).toArray(function(searchErr, result) {
+          if(searchErr) return callback({details: "Error buscando coincidencias", person: person, query: query, err: String(searchErr)}, null);
+
+          if( result.length == 0 ){
+            data.persons[index][ utils.matchColumn ] = "";
+          }else{
+            // update
+            for (var matchedPerson of result) {
+              if( isSamePerson(person, matchedPerson) ){
+                data.persons[index][ utils.matchColumn ] = matchedPerson[ utils.fullnameColumn ];
+                break;
+              }
+            }
+
+            getMatch(data, ++index, callback);
+          }
+        });
+      });
+    }
+  }
+}
+
+function getMatches(data, callback){
+  if( !data.persons[0].hasOwnProperty(utils.fullnameColumn) ){
+    console.log("creating names");
+    data.persons = utils.buildFullName(data.persons, data.config);
+  }
+
+  getMatch(data, 0, callback);
+}
+
 
 module.exports = {
-  insertPersons: insertPersons
+  insertPersons: insertPersons,
+  getMatches: getMatches
 }
