@@ -12,13 +12,17 @@ function isSamePerson(a, b){
   return a[ utils.fullnameColumn ] === b[ utils.fullnameColumn ];
 }
 
+function isValidPerson(person){
+  return person[ utils.fullnameColumn ] === "";
+}
+
 function insert(data, index, callback){
   if( index == data.persons.length ){
     callback("end");
   }else{
     var person = data.persons[index];
 
-    if( person[ utils.fullnameColumn ] == "" ){
+    if( isValidPerson(person) ){
       console.log("Omitiendo", person);
       insert(data, ++index, callback);
     }else{
@@ -121,7 +125,7 @@ function getMatch(data, index, callback){
   }else{
     var person = data.persons[index];
 
-    if( person[ utils.fullnameColumn ] == "" ){
+    if( isValidPerson(person) ){
       console.log("Omitiendo", person);
       getMatch(data, ++index, callback);
     }else{
