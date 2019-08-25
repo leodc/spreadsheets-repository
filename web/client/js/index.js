@@ -19,7 +19,12 @@ $(function () {
 
   $("#insertPersonsDialog").on("shown.bs.modal", function (event) {
     window.selectedWorksheet = $(event.relatedTarget).data("index");
-    $("#insertPersonsInput").focus();
+
+    if( getConfig(selectedWorksheet) ){
+      $("#insertPersonsInput").focus();
+    }else{
+      $("#insertPersonsDialog").modal("hide");
+    }
   });
 
   $("#userData").on("change",function(){
@@ -59,6 +64,11 @@ function getConfig(worksheetIndex){
     referenceColumnsValue: ($("#referenceColumns" + worksheetIndex).length>0) ? $("#referenceColumns" + worksheetIndex).val():[]
   };
 
+  if( config.nameColumnsValue.length == 0 ){
+    $("#selectedNameColumns" + worksheetIndex).notify("Selecciona las columnas de nombre", "error");
+    return null;
+  }
+
   return config;
 }
 
@@ -90,12 +100,17 @@ function initWorksheet(worksheetIndex){
 }
 
 function buildFullName(worksheetIndex){
+  $("#chargingDialog").modal("show");
   console.log("building names " + worksheetIndex);
 
   var config = getConfig(worksheetIndex);
-  worksheets[worksheetIndex].dataJson = utils.buildFullName(worksheets[worksheetIndex].dataJson, config);
+  if(config){
+    worksheets[worksheetIndex].dataJson = utils.buildFullName(worksheets[worksheetIndex].dataJson, config);
 
-  $("#dataTable" + worksheetIndex).bootstrapTable("load", worksheets[worksheetIndex].dataJson);
+    $("#dataTable" + worksheetIndex).bootstrapTable("load", worksheets[worksheetIndex].dataJson);
+  }
+
+  $("#chargingDialog").modal("hide");
 }
 
 function loadWorksheets(){

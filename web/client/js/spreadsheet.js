@@ -4,8 +4,6 @@ var contentTemplate = "<div id='worksheet{{index}}' class='tab-pane {{added_clas
 function parseWorksheet(worksheetIndex){
   console.log("parsing worksheet " + worksheetIndex);
 
-  var config = getConfig(worksheetIndex);
-
   var indexNoName=0;
   var headers = [utils.matchColumn, utils.fullnameColumn];
   var columns = [
@@ -48,8 +46,6 @@ function parseWorksheet(worksheetIndex){
 
 
 function buildControls(worksheetIndex){
-  var config = getConfig(worksheetIndex);
-
   var controls = `
   <div class='container' id='controls` + worksheetIndex + `'>
 
@@ -59,18 +55,12 @@ function buildControls(worksheetIndex){
         <ul class="sortable connectedSortable` + worksheetIndex + `" id="nameColumns` + worksheetIndex + `">
   `;
 
-  var selectedNamesItems = "";
-  for (var nameColumn of config.nameColumnsValue) {
-    selectedNamesItems += "<li>" + nameColumn + "</li>";
-  }
   for (var header of worksheets[worksheetIndex].headers) {
     if(header == utils.fullnameColumn || header == utils.matchColumn){
       continue;
     }
 
-    if( config.nameColumnsValue.indexOf(header) == -1 ){
-      controls += "<li>" + header + "</li>";
-    }
+    controls += "<li>" + header + "</li>";
   }
 
   controls += `
@@ -78,7 +68,7 @@ function buildControls(worksheetIndex){
       </div>
 
       <div class="col">
-        <ul class="sortable connectedSortable` + worksheetIndex + `" id="selectedNameColumns` + worksheetIndex + `">` + selectedNamesItems + `</ul>
+        <ul class="sortable connectedSortable` + worksheetIndex + `" id="selectedNameColumns` + worksheetIndex + `"></ul>
         <small>**Orden correcto:<br>[Apellido paterno]<br>[Apellido materno]<br>[Nombres]</small>
       </div>
     </div>
@@ -94,8 +84,7 @@ function buildControls(worksheetIndex){
     if(header == utils.fullnameColumn || header == utils.matchColumn){
       continue;
     }
-    var selected = (config.linkColumnsValue.indexOf(header)>-1) ? "selected":"";
-    controls += "<option " + selected + ">" + header + "</option>";
+    controls += "<option>" + header + "</option>";
   }
 
   controls += `
@@ -113,8 +102,7 @@ function buildControls(worksheetIndex){
     if(header == utils.fullnameColumn || header == utils.matchColumn){
       continue;
     }
-    var selected = (config.referenceColumnsValue.indexOf(header)>-1) ? "selected":"";
-    controls += "<option " + selected + ">" + header + "</option>";
+    controls += "<option>" + header + "</option>";
   }
 
   controls += `
