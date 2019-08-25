@@ -22,8 +22,10 @@ function insert(data, index, callback){
   }else{
     var person = data.persons[index];
 
+    process.stdout.write(index + "/" + data.persons.length + ": " + person[ utils.fullnameColumn ] + " -- ");
+
     if( isValidPerson(person) ){
-      console.log("Omitiendo", person);
+      console.log("omitiendo", JSON.stringify(person));
       insert(data, ++index, callback);
     }else{
       MongoClient.connect(mongoUrl, { useNewUrlParser: true }, function(connectErr, client) {
@@ -55,52 +57,41 @@ function insert(data, index, callback){
 
           newPerson[ data.config.propertyToInsert ] = [ newRecord ];
 
-          if( result.length == 0 ){
-            // insert new person
-            client.db(database).collection(collection).insertOne(newPerson, function(insertErr, res){
-              if(insertErr) return callback({details: "Error insertando en la base de datos", person: newPerson, err: String(insertErr)}, null);
-              console.log("inserted", newPerson[ utils.fullnameColumn ]);
+          // update
+          var update = false;
+          for (var matchedPerson of result) {
+            if( isSamePerson(newPerson, matchedPerson) ){
+              if( matchedPerson[ data.config.propertyToInsert ] ){
+                matchedPerson[ data.config.propertyToInsert ] = matchedPerson[ data.config.propertyToInsert ].concat( newPerson[ data.config.propertyToInsert ] );
+              }else{
+                matchedPerson[ data.config.propertyToInsert ] = newPerson[ data.config.propertyToInsert ];
+              }
+
+              update = true;
+              break;
+            }
+          }
+
+          if( update ){
+            var select = {};
+            select[ utils.fullnameColumn ] = matchedPerson[ utils.fullnameColumn ];
+
+            client.db(database).collection(collection).updateOne(select, { $set: matchedPerson }, function(insertUpdateErr, res){
+              if(insertUpdateErr) return callback({details: "Error actualizando la base de datos", person: matchedPerson, err: String(insertUpdateErr)}, null);
+
+              console.log("update", matchedPerson[ utils.fullnameColumn ]);
 
               client.close();
               insert(data, ++index, callback);
             });
           }else{
-            // update
-            var update = false;
-            for (var matchedPerson of result) {
-              if( isSamePerson(newPerson, matchedPerson) ){
-                if( matchedPerson[ data.config.propertyToInsert ] ){
-                  matchedPerson[ data.config.propertyToInsert ] = matchedPerson[ data.config.propertyToInsert ].concat( newPerson[ data.config.propertyToInsert ] );
-                }else{
-                  matchedPerson[ data.config.propertyToInsert ] = newPerson[ data.config.propertyToInsert ];
-                }
+            client.db(database).collection(collection).insertOne(newPerson, function(insertErr, res){
+              if(insertErr) return callback({details: "Error insertando en la base de datos", person: newPerson, err: String(insertErr)}, null);
+              console.log("inserted as new person");
 
-                update = true;
-                break;
-              }
-            }
-
-            if( update ){
-              var select = {};
-              select[ utils.fullnameColumn ] = matchedPerson[ utils.fullnameColumn ];
-
-              client.db(database).collection(collection).updateOne(select, { $set: matchedPerson }, function(insertUpdateErr, res){
-                if(insertUpdateErr) return callback({details: "Error actualizando la base de datos", person: matchedPerson, err: String(insertUpdateErr)}, null);
-
-                console.log("update", matchedPerson[ utils.fullnameColumn ]);
-
-                client.close();
-                insert(data, ++index, callback);
-              });
-            }else{
-              client.db(database).collection(collection).insertOne(newPerson, function(insertErr, res){
-                if(insertErr) return callback({details: "Error insertando en la base de datos", person: newPerson, err: String(insertErr)}, null);
-                console.log("inserted", newPerson[ utils.fullnameColumn ]);
-
-                client.close();
-                insert(data, ++index, callback);
-              });
-            }
+              client.close();
+              insert(data, ++index, callback);
+            });
           }
         });
       });
@@ -118,15 +109,15 @@ function insertPersons(data, callback){
 }
 
 function getMatch(data, index, callback){
-  console.log("getting match", index, data.persons.length);
-
   if( index == data.persons.length ){
     callback(data.persons);
   }else{
     var person = data.persons[index];
 
+    process.stdout.write(index + "/" + data.persons.length + ": " + person[ utils.fullnameColumn ] + " -- ");
+
     if( isValidPerson(person) ){
-      console.log("Omitiendo", person);
+      console.log("omitiendo", JSON.stringify(person));
       getMatch(data, ++index, callback);
     }else{
       var query = {$text: { $search: person[ utils.fullnameColumn ] }};
@@ -136,6 +127,8 @@ function getMatch(data, index, callback){
 
         client.db(database).collection(collection).find(query).project({ score: { $meta: "textScore" } }).sort( { score: { $meta: "textScore" } } ).toArray(function(searchErr, result) {
           if(searchErr) return callback({details: "Error buscando coincidencias", person: person, query: query, err: String(searchErr)}, null);
+
+          console.log("evaluando", result.length, "coincidencias");
 
           if( result.length == 0 ){
             data.persons[index][ utils.matchColumn ] = "";
@@ -147,9 +140,9 @@ function getMatch(data, index, callback){
                 break;
               }
             }
-
-            getMatch(data, ++index, callback);
           }
+
+          getMatch(data, ++index, callback);
         });
       });
     }
