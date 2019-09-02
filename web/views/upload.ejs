@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="es">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+		<title>CIDE uploader</title>
+
+		<!-- font-awesome -->
+		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+
+		<!-- bootstrap -->
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+		<!-- bootstrap-table -->
+		<link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.15.3/dist/bootstrap-table.min.css">
+
+		<link rel="stylesheet" href="/css/master.css">
+	</head>
+	<body>
+		<div class="container py-0 my-0">
+
+			<div class="jumbotron py-3 mb-2">
+				<form id="uploadForm" action="<%= uploadUrl %>" method="post" enctype="multipart/form-data">
+					<div class="input-group">
+					  <div class="custom-file">
+					    <input type="file" class="custom-file-input" id="userData" name="userData" aria-describedby="userDataAddon01">
+					    <label class="custom-file-label" for="userData">Seleccionar archivo</label>
+					  </div>
+						<div class="input-group-append">
+							<button class="btn btn-primary" type="submit">Enviar</button>
+					  </div>
+					</div>
+				</form>
+
+				<small>* Antes de subir un archivo asegurate que los encabezados ocupen solo una linea.</small>
+			</div>
+
+		</div>
+
+		<ul class="nav nav-tabs container mb-4" id="tab-headers"></ul>
+		<div class="tab-content" id="tab-body"></div>
+
+		<!-- Loading -->
+		<div class="modal" tabindex="-1" role="dialog" id="chargingDialog" style="z-index: 9999;">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<div class="modal-body">
+						<h4>Cargando...</h4>
+						<div class="progress">
+							<div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
+								<span class="sr-only">Cargando...</span>
+							</div>
+						</div>
+					</div>
+				</div><!-- /.modal-content -->
+			</div><!-- /.modal-dialog -->
+		</div><!-- /.modal -->
+
+
+		<!-- insert to database -->
+		<div class="modal fade" tabindex="-1" role="dialog" id="insertPersonsDialog">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+
+					<div class="modal-header">
+						<h5 class="modal-title">Agregar a la base de datos</h5>
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						</button>
+					</div>
+
+					<div class="modal-body">
+						<div class="form-group">
+						  <label for="insertPersonsInput" id="insertPersonsLabel">¿A que sección se deben de agregar los datos?</label>
+						  <input type="text" class="form-control" id="insertPersonsInput">
+						</div>
+					</div>
+					<div class="modal-footer">
+	        	<button type="button" class="btn btn-primary" onclick="insertPersons();" id="insertPersonsAcceptButton">Aceptar</button>
+	      	</div>
+				</div><!-- /.modal-content -->
+			</div><!-- /.modal-dialog -->
+		</div><!-- /.modal -->
+
+
+		<!-- Edit value -->
+		<div class="modal fade" tabindex="-1" role="dialog" id="editValueDialog">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<div class="modal-body">
+						<div class="form-group">
+						  <label for="editValueInput" id="editValueLabel"></label>
+						  <input type="text" class="form-control" id="editValueInput">
+						</div>
+					</div>
+					<div class="modal-footer">
+	        	<button type="button" class="btn btn-primary" onclick="updateCellValue();" id="editValueAcceptButton">Aceptar</button>
+	      	</div>
+				</div><!-- /.modal-content -->
+			</div><!-- /.modal-dialog -->
+		</div><!-- /.modal -->
+
+		<script src="/socket.io/socket.io.js"></script>
+
+		<!-- jquery -->
+		<script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+		<script src="/plugins/jquery.form.js"></script>
+		<!-- jquery-ui -->
+		<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
+
+		<!-- bootstrap -->
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
+	  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
+		<!-- bootstrap-table -->
+		<script src="https://unpkg.com/bootstrap-table@1.15.3/dist/bootstrap-table.min.js"></script>
+		<!-- bootstrap-table-locale -->
+		<script src="https://unpkg.com/bootstrap-table@1.15.3/dist/locale/bootstrap-table-es-MX.min.js"></script>
+
+		<!-- notify -->
+		<script src="/plugins/notify.min.js"></script>
+
+		<!-- latinize -->
+		<script src="/plugins/latinize.js"></script>
+
+		<script src="/js/utils.js"></script>
+		<script src="/js/upload/socket.js"></script>
+		<script src="/js/upload/spreadsheet.js"></script>
+		<script src="/js/upload/index.js"></script>
+	</body>
+</html>

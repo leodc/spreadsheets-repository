@@ -15,11 +15,27 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 // routers
+var cargaRouter = require("./routes/upload.js");
 var indexRouter = require("./routes/index.js");
+var personsRouter = require("./routes/persons.js");
+
+app.use("/carga", cargaRouter);
 app.use("/", indexRouter);
+app.use("/persona", personsRouter);
+
+
+io.on("connection", function(socket){
+  mongo.getTotalPersons(function(err, count){
+    socket.emit("totalPersons", count);
+  });
+
+  socket.on("nameList", mongo.getNameList);
+  socket.on("search", mongo.searchPersonsByNames);
+  socket.on("getPerson", mongo.getPerson);
+});
 
 // socket
-io.on("connection", function(socket){
+io.of("/carga").on("connection", function(socket){
 
   socket.on("insertPersons", mongo.insertPersons);
   socket.on("getMatches", mongo.getMatches);

@@ -1,136 +1,171 @@
-$(function () {
-  $("#editValueInput").keypress(function(e){
-    if(e.which == 13){
-      $("#editValueAcceptButton").click();
-      return false;
-    }
-  });
+var socket = io();
 
-  $("#insertPersonsInput").keypress(function(e){
-    if(e.which == 13){
-      $("#insertPersonsAcceptButton").click();
-      return false;
-    }
-  });
 
-  $("#editValueDialog").on("shown.bs.modal", function (event) {
-    $("#editValueInput").focus();
-  });
+function downloadPersons(){
+  searchPersons(function(persons){
 
-  $("#insertPersonsDialog").on("shown.bs.modal", function (event) {
-    window.selectedWorksheet = $(event.relatedTarget).data("index");
-
-    if( getConfig(selectedWorksheet) ){
-      $("#insertPersonsInput").focus();
+    var fileContent = "";
+    if( $("#downloadJson").is(":checked") ){
+      fileContent = JSON.stringify(persons);
     }else{
-      $("#insertPersonsDialog").modal("hide");
+      var headers = ["name", "name_id", "birth_entity", "code", "gender"];
+      var skip = ["_id", "name", "name_id", "birth_entity", "_joined", "code", "gender"];
+      var childrenProperties = {};
+      for (var person of persons) {
+        for (var parentProp in person) {
+          if( skip.indexOf(parentProp) < 0 ){
+
+            var counter = 0;
+            for (var prop of person[parentProp]) {
+              for (var key in prop){
+                var newHeader = parentProp + "." + key + "." + (counter);
+
+                if(!childrenProperties[parentProp]){
+                  childrenProperties[parentProp] = [];
+                }
+
+                if(childrenProperties[parentProp].indexOf(newHeader) < 0){
+                  childrenProperties[parentProp].push(newHeader);
+                }
+              }
+              counter++;
+            }
+          }
+        }
+      }
+
+
+      for (var parentProp in childrenProperties) {
+        headers = headers.concat(childrenProperties[parentProp]);
+      }
+
+      fileContent = headers.join(",") + "\n";
+      for (var person of persons) {
+        for(var header of headers){
+          var value = "";
+
+          if(header == "name"){
+            value = person[header].join(" ");
+          }else if(header.includes(".")){
+            var aux = header.split(".");
+
+            var parentProp = aux[0];
+            var propKey = aux[1];
+            var elementIndex = parseInt(aux[2]);
+
+            value = (person[parentProp] && person[parentProp].length > elementIndex && person[parentProp][elementIndex][propKey]) ? person[parentProp][elementIndex][propKey]:"";
+          }else{
+            value = person[header] ? person[header]:"";
+          }
+
+          value = value.toString().replace(",",";");
+          fileContent += value + ",";
+        }
+
+        fileContent = fileContent.slice(0, -1) + "\n";
+      }
     }
+
+    var filename = ($("#downloadFileName").val() != "") ? $("#downloadFileName").val():"personas_descarga";
+    var fileType = ($("#downloadJson").is(":checked")) ? "json":"csv";
+
+    var blob = new Blob([fileContent], {type: "text/plain;charset=utf-8"});
+
+    saveAs(blob, filename + "." + fileType);
+
+    $("#loadingModal").modal("hide");
+  });
+}
+
+function createNewFilter(){
+  var prop = $("#newFilterProperty").val();
+  var opt = $("#newFilterOpt").val();
+  var value = $("#newFilterValue").val();
+
+  var condition = prop + ":" + opt + ":" + value;
+  var contidionHtml = prop + " " + $("#newFilterOpt").find("option:selected").text() + " " + value;
+
+  var html = "<span class='badge badge-primary filter-mongo' data-condition='" + condition + "' onclick='this.remove();' style='cursor:pointer;'> " + contidionHtml +   " &nbsp;<i class='fas fa-times' style='color:red;'></i></span>&nbsp;"
+
+  $("#filterList").append(html);
+
+  $("#newFilterModal").modal("hide");
+}
+
+function searchPersons(callback){
+  $("#loadingModal").modal("show");
+
+  var names = $("#searchName").val().toLowerCase();
+  var opt = $("#sourceOpt").val();
+  // var score = parseInt($("#score").val()) ? parseInt($("#score").val()):100;
+  //
+  // $("#score").val(score);
+
+  // build query
+  var filters = [];
+  $(".filter-mongo").each(function(){
+    filters.push($(this).data("condition"));
   });
 
-  $("#userData").on("change",function(){
-    var fileName = $(this).val();
-    var splitedPath = fileName.split("\\");
-    $(this).next(".custom-file-label").html( splitedPath[ splitedPath.length - 1 ] );
-  });
+  $("#searchNames").html("");
 
-  $("#uploadForm").ajaxForm({
-    beforeSerialize: function(arr, $form, options) {
-      $("#chargingDialog").modal("show");
+  if(!callback){
+    callback = function(persons){
+      console.log(persons);
 
-      $("#tab-body").html("");
-      $("#tab-headers").html("");
-    },
-    success: function(worksheets){
-      window.worksheets = worksheets;
-      loadWorksheets();
+      for (var person of persons) {
+        html = "<li>";
+        html += "<a href='/persona/" + person[utils.fullnameColumn] + "' target='_blank'>" + person[utils.fullnameColumn] + "</a>";
+        html += "</li>";
 
-      $("#chargingDialog").modal("hide");
+        $("#searchNames").append(html);
+      }
+      $("#loadingModal").modal("hide");
+    };
+  }
+
+  // socket.emit( "search" , {names: names, opt: opt, score: score, filters: filters}, callback);
+  socket.emit( "search" , {names: names, opt: opt, filters: filters}, callback);
+}
+
+function getPersons() {
+  var max = parseInt($("#maxPersons").val());
+
+  $("#loadingModal").modal("show");
+
+  socket.emit("nameList", max,function(persons){
+    $("#nameindex").html("");
+
+    console.log(persons);
+
+    var option;
+    for( var person of persons ){
+      option = "<li><a target='_blank' href='/persona/" + person[utils.fullnameColumn] + "'>" + person[utils.fullnameColumn] + "</a></li>";
+      $("#nameindex").append(option);
     }
-  });
 
-  $('[data-toggle="tooltip"]').tooltip();
+    $("#loadingModal").modal("hide");
+  });
+}
+
+var init = false;
+socket.on("totalPersons", function(count){
+  if(!init){
+    $("#totalPersons").val(count);
+
+    getPersons();
+
+    init = true;
+  }
 });
 
+$(function () {
+  $("#loadingModal").modal("show");
 
-function getConfig(worksheetIndex){
-  var selectedNameColumnsList = [];
-  $.each($("#selectedNameColumns" + worksheetIndex).find("li"), function() {
-    selectedNameColumnsList.push($(this).text());
-  });
-
-  var config= {
-    nameColumnsValue: selectedNameColumnsList,
-    linkColumnsValue: ($("#linkColumns" + worksheetIndex).length>0) ? $("#linkColumns" + worksheetIndex).val():[],
-    referenceColumnsValue: ($("#referenceColumns" + worksheetIndex).length>0) ? $("#referenceColumns" + worksheetIndex).val():[]
-  };
-
-  if( config.nameColumnsValue.length == 0 ){
-    $("#selectedNameColumns" + worksheetIndex).notify("Selecciona las columnas de nombre", "error");
-    return null;
-  }
-
-  return config;
-}
-
-function initWorksheet(worksheetIndex){
-  $("#dataTable" + worksheetIndex).bootstrapTable({
-    columns: worksheets[worksheetIndex].columns,
-    data: worksheets[worksheetIndex].dataJson,
-    pagination: true,
-    search: true,
-    showSearchClearButton: true,
-    paginationVAlign: "top",
-    searchAlign: "left",
-    onClickCell: function (field, value, row, element) {
-      var activeWorksheet = parseInt($(".nav-link.active")[0].hash.replace("#worksheet",""));
-
-      $("#editValueDialog").off("show.bs.modal");
-      $("#editValueDialog").on("show.bs.modal", function (event) {
-        $(this).find("#editValueLabel").text(field);
-        $(this).find("#editValueInput").val(value);
-
-        $("#editValueAcceptButton").data("row", element[0].parentElement.dataset.index);
-        $("#editValueAcceptButton").data("field", field);
-        $("#editValueAcceptButton").data("index", activeWorksheet);
-      });
-
-      $("#editValueDialog").modal("show");
+  $("#searchName, #score").keypress(function (e) {
+    if (e.which == 13) {
+      searchPersons();
+      return false;
     }
   });
-}
-
-function buildFullName(worksheetIndex){
-  $("#chargingDialog").modal("show");
-  console.log("building names " + worksheetIndex);
-
-  var config = getConfig(worksheetIndex);
-  if(config){
-    worksheets[worksheetIndex].dataJson = utils.buildFullName(worksheets[worksheetIndex].dataJson, config);
-
-    $("#dataTable" + worksheetIndex).bootstrapTable("load", worksheets[worksheetIndex].dataJson);
-  }
-
-  $("#chargingDialog").modal("hide");
-}
-
-function loadWorksheets(){
-  var worksheet, title, content;
-  for (var index = 0; index < window.worksheets.length; index++) {
-    parseWorksheet(index);
-
-    worksheet = window.worksheets[index];
-
-    title = titleTemplate.replace("{{added_class}}", ((index==0)?"active":"")).replace("{{index}}", index).replace("{{worksheet_name}}", worksheet.name);
-    content = contentTemplate.replace("{{added_class}}", ((index==0)?"active":"fade")).replace("{{index}}", index).replace("{{controls}}", buildControls(index)).replace("{{table_view}}", buildTable(index));
-
-    $("#tab-headers").append(title);
-    $("#tab-body").append(content);
-
-    $( "#nameColumns" + index + ", #selectedNameColumns" + index ).sortable({
-        connectWith: ".connectedSortable"+index,
-        placeholder: "ui-state-highlight"
-    }).disableSelection();
-
-    initWorksheet(index);
-  }
-}
+});

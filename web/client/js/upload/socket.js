@@ -1,4 +1,4 @@
-var socket = io();
+var socket = io("/carga");
 
 function insertPersons(){
   var indexSpredsheet = window.selectedWorksheet;

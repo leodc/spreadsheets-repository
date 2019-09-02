@@ -158,8 +158,112 @@ function getMatches(data, callback){
   getMatch(data, 0, callback);
 }
 
+function getTotalPersons(callback){
+
+  MongoClient.connect(mongoUrl, { useNewUrlParser: true }, function(connectErr, client) {
+    var db = client.db(database);
+
+    // count documents
+    db.collection(collection).find({},{ projection: {clean_name: 1} }).count(callback);
+  });
+}
+
+function getNameList(max, callback){
+  MongoClient.connect(mongoUrl, { useNewUrlParser: true }, function(connectErr, client) {
+    var db = client.db(database);
+
+    // Find document
+    db.collection(collection)
+      .find({}, { projection: { clean_name: 1} })
+      .sort({'name.0': 1})
+      .limit(max)
+      .toArray()
+      .then(callback);
+  });
+}
+
+
+function searchPersonsByNames(prop, callback) {
+  console.log("searching person by names", prop);
+
+  // query
+  // var query = {};
+  //
+  // if(prop.names && prop.names != ""){
+  //   query["name"]= { $all: prop.names.split(" ") };
+  // }
+  //
+  // query["_joined._score"] = {};
+  // query["_joined._score"][prop.opt] = prop.score;
+
+  var query = {$text: { $search: prop.names }};
+  
+  // custom filters
+  for (var customFilter of prop.filters) {
+    var aux = customFilter.split(":");
+    var filterProp = aux[0].trim();
+    var filterOpt = aux[1].trim();
+    var filterValue = aux[2].trim();
+
+    if( !query[filterProp] ){
+      query[filterProp] = {};
+    }
+
+    if (filterOpt == "$regex"){
+      query[filterProp][filterOpt] = new RegExp(".*" + filterValue + ".*", "i");
+    }else{
+      query[filterProp][filterOpt] = filterValue;
+    }
+  }
+
+  MongoClient.connect(mongoUrl, { useNewUrlParser: true }, function(connectErr, client) {
+    var db = client.db(database);
+
+    var sort = {};
+    sort[utils.fullnameColumn] = 1;
+
+    // Find document
+    db.collection(collection)
+      .find(query)
+      .sort(sort)
+      .toArray()
+      .then(callback);
+  });
+}
+
+
+
+function getPerson(name_id, callback){
+  console.log("getting person", name_id);
+
+  // query
+  var query = { name_id: name_id };
+
+
+  // Create a new MongoClient
+  MongoClient.connect(mongoUrl, { useNewUrlParser: true }, function(connectErr, client) {
+    var db = client.db(database);
+
+    // Find document
+    db.collection(collection).findOne(query, function(err, person){
+      if(err || !person){
+        console.log("Error en la busqueda por name_id, intentando por nombre", name_id);
+
+        var query = { name: { $all: name_id.split("_") } };
+        db.collection(collection)
+          .findOne(query, callback)
+      }else{
+        callback(err, person);
+      }
+    });
+  });
+}
 
 module.exports = {
   insertPersons: insertPersons,
-  getMatches: getMatches
+  getMatches: getMatches,
+  searchPersonsByNames: searchPersonsByNames,
+  getPerson: getPerson,
+  getNameList: getNameList,
+  getTotalPersons: getTotalPersons
 }
