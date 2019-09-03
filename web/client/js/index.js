@@ -3,13 +3,15 @@ var socket = io();
 
 function downloadPersons(){
   searchPersons(function(persons){
+    console.log(persons);
 
     var fileContent = "";
     if( $("#downloadJson").is(":checked") ){
       fileContent = JSON.stringify(persons);
     }else{
-      var headers = ["name", "name_id", "birth_entity", "code", "gender"];
-      var skip = ["_id", "name", "name_id", "birth_entity", "_joined", "code", "gender"];
+      var headers = [utils.fullnameColumn];
+      var skip = ["_id", utils.fullnameColumn, "score"];
+
       var childrenProperties = {};
       for (var person of persons) {
         for (var parentProp in person) {
@@ -97,9 +99,6 @@ function searchPersons(callback){
 
   var names = $("#searchName").val().toLowerCase();
   var opt = $("#sourceOpt").val();
-  // var score = parseInt($("#score").val()) ? parseInt($("#score").val()):100;
-  //
-  // $("#score").val(score);
 
   // build query
   var filters = [];

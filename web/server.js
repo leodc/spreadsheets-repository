@@ -37,8 +37,8 @@ io.on("connection", function(socket){
 // socket
 io.of("/carga").on("connection", function(socket){
 
-  socket.on("insertPersons", mongo.insertPersons);
-  socket.on("getMatches", mongo.getMatches);
+  socket.on("insertPersons", mongo.insertPersonsArray);
+  socket.on("getMatches", mongo.getArrayMatches);
 
 });
 

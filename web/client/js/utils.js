@@ -19,7 +19,7 @@ function replaceAccents(str){
     if(!fullname)
       return "";
 
-    return replaceAccents( String(fullname).toLocaleLowerCase().trim() ).replace(/[^ \w]|[0-9]/g, "");
+    return replaceAccents( String(fullname).toLocaleLowerCase().trim() ).replace(/[^ \w]|[0-9]/g, "").replace(/  +/g, " ");
   }
 
   exports.cleanHeader = function (header){
