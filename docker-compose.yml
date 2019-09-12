@@ -5,7 +5,7 @@ services:
     build: ./web
     image: cide/uploader
     ports:
-      - 8080:8080
+      - 4000:8080
     depends_on:
       - mongo
     restart: always
@@ -17,8 +17,6 @@ services:
   mongo:
     build: ./mongo
     image: cide/mongo:3.6
-    ports: 
-      - 27017:27017
     volumes:
       - ./mongo/data:/data/db
     restart: always
