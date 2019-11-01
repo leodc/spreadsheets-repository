@@ -19,6 +19,7 @@
   "homepage": "https://github.com/leodc/wizard_d3#readme",
   "dependencies": {
     "body-parser": "^1.19.0",
+    "compare-names": "^1.1.0",
     "csv-parse": "^2.4.1",
     "ejs": "^2.6.2",
     "express": "^4.17.1",

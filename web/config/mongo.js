@@ -1,5 +1,7 @@
 var MongoClient = require("mongodb").MongoClient;
 var utils = require("../client/js/utils");
+var compareNames = require('compare-names');
+
 
 var host = process.env.MONGO_HOST || "mongo";
 var port = process.env.MONGO_PORT || "27017";
@@ -9,7 +11,8 @@ var collection = process.env.MONGO_COLLECTION || "personas";
 var mongoUrl = "mongodb://" + host + ":" + port + "/";
 
 function isSamePerson(a, b){
-  return a[ utils.fullnameColumn ] === b[ utils.fullnameColumn ];
+  console.log(a[ utils.fullnameColumn ], b[ utils.fullnameColumn ], compareNames(a[ utils.fullnameColumn ], b[ utils.fullnameColumn ]) );
+  return (a[ utils.fullnameColumn ] === b[ utils.fullnameColumn ] || compareNames(a[ utils.fullnameColumn ], b[ utils.fullnameColumn ]) );
 }
 
 function isValidPerson(person){
