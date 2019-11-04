@@ -11,28 +11,38 @@ function replaceAccents(str){
   exports.fullnameColumn = "clean_name";
   exports.matchColumn = "matched_name";
   exports.emptyColumnName = "no_name";
+  exports.codeColumn = "codigo";
+  exports.codeColumnOptions = ["codigo", "code"];
 
   exports.linkSuffix = "_link";
   exports.referenceSuffix = "_reference";
 
   exports.cleanName = function(fullname){
-    if(!fullname)
-      return "";
+    if(typeof fullname === "string"){
+      return replaceAccents( String(fullname).toLocaleLowerCase().trim() ).replace(/[^ \w]|[0-9]/g, "").replace(/  +/g, " ");
+    }
 
-    return replaceAccents( String(fullname).toLocaleLowerCase().trim() ).replace(/[^ \w]|[0-9]/g, "").replace(/  +/g, " ");
+    return "";
   }
 
   exports.cleanHeader = function (header){
-    if(!header)
-      return "";
-    return replaceAccents( String(header).toLocaleLowerCase().trim() ).replace(/ /g,"_").replace(/[^\w]|[0-9]/g, "");
+    if(typeof header === "number"){
+      return String(header);
+    }else if(typeof header === "string"){
+      return replaceAccents( String(header).toLocaleLowerCase().trim() ).replace(/ /g,"_").replace(/[^\w]/g, "")
+    }
+
+    return "";
   }
 
   exports.cleanValue = function (value){
-    if(!value)
-      return "";
+    if(typeof value === "number"){
+      return value;
+    }else if(typeof value === "string"){
+      return value.trim()
+    }
 
-    return String(value).trim();
+    return "";
   }
 
   exports.buildFullName = function(persons, config){

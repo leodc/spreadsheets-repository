@@ -14,10 +14,11 @@ $(function(){
     console.log(person);
 
     $("#person-name").html( person[ utils.fullnameColumn ] );
+    $("#person-code").html( person[ utils.codeColumn ] );
 
     var html = "";
     for (var property in person) {
-      if( property === utils.fullnameColumn || property === "score"){
+      if( property === utils.fullnameColumn || property === "score" || property === utils.codeColumn){
         continue;
       }
 

@@ -21,6 +21,10 @@ function parseWorksheet(worksheetIndex){
     for (i = 0; i < worksheets[worksheetIndex].data[0].length; i++) {
       header = worksheets[worksheetIndex].data[0][i] ? utils.cleanHeader(worksheets[worksheetIndex].data[0][i]):(utils.emptyColumnName + "_" + (++indexNoName));
 
+      if(utils.codeColumnOptions.indexOf(header) >= 0){
+        header = utils.codeColumn;
+      }
+
       headers.push(header);
       columns.push({field: header, title: header});
     }
