@@ -1,6 +1,6 @@
 var MongoClient = require("mongodb").MongoClient;
 var utils = require("../client/js/utils");
-var compareNames = require("compare-names");
+var personUtils = require("./person");
 
 var host = process.env.MONGO_HOST || "mongo";
 var port = process.env.MONGO_PORT || "27017";
@@ -11,17 +11,17 @@ var mongoUrl = "mongodb://" + host + ":" + port + "/";
 
 function isSamePerson(a, b){
   if( typeof a[utils.codeColumn] === "string" && a[utils.codeColumn] !== "" && a[utils.codeColumn] === b[utils.codeColumn]){
-    console.log("same code", a[utils.codeColumn])
-    return true;
+    console.log("same code", a[utils.codeColumn]);
+    return 2;
   }
 
-  // if(a[ utils.fullnameColumn ] === b[ utils.fullnameColumn ] || compareNames(a[ utils.fullnameColumn ], b[ utils.fullnameColumn ])){
-  if(a[ utils.fullnameColumn ] === b[ utils.fullnameColumn ]){
+  var score = personUtils.sameName(a[ utils.fullnameColumn ], b[ utils.fullnameColumn ]);
+  if( score >= personUtils.minScoreSamePerson ){
     console.log("same name", a[ utils.fullnameColumn ], b[ utils.fullnameColumn ]);
-    return true;
+    return score;
   }
 
-  return false;
+  return 0;
 }
 
 function isValidPerson(person){
@@ -81,7 +81,12 @@ function insertPersonsArray(data, callback, index){
       for(var j = i+1; j < aux.length; j++){
         var personB = aux[j];
 
-        if(isSamePerson(personA, personB)){
+        var score = isSamePerson(personA, personB);
+        if( score > personUtils.minScoreSamePerson){
+          for (var k = 0; k < personB[ data.config.propertyToInsert ].length; k++ ) {
+            personB[ data.config.propertyToInsert ][k].score = score;
+          }
+
           personA[ data.config.propertyToInsert ] = personA[ data.config.propertyToInsert ].concat(personB[ data.config.propertyToInsert ]);
           aux.splice(j, 1);
           j--;
@@ -110,7 +115,12 @@ function insertPersonsArray(data, callback, index){
         // update
         var update = false;
         for (var matchedPerson of result) {
-          if( isSamePerson(person, matchedPerson) ){
+          var score = isSamePerson(person, matchedPerson);
+          if( score > personUtils.minScoreSamePerson){
+            for (var k = 0; k < person[ data.config.propertyToInsert ].length; k++ ) {
+              person[ data.config.propertyToInsert ][k].score = score;
+            }
+
             if( matchedPerson[ data.config.propertyToInsert ] ){
               matchedPerson[ data.config.propertyToInsert ] = matchedPerson[ data.config.propertyToInsert ].concat( person[ data.config.propertyToInsert ] );
             }else{
@@ -120,6 +130,7 @@ function insertPersonsArray(data, callback, index){
             update = true;
             break;
           }
+
         }
 
         if( update ){
@@ -180,7 +191,7 @@ function getArrayMatches(data, callback, index){
           }else{
             // update
             for (var matchedPerson of result) {
-              if( isSamePerson(person, matchedPerson) ){
+              if( isSamePerson(person, matchedPerson) > personUtils.minScoreSamePerson ){
                 data.persons[index][ utils.matchColumn ] = matchedPerson[ utils.fullnameColumn ];
                 break;
               }
@@ -285,7 +296,7 @@ function getPerson(fullname, callback){
 
         var found = false;
         for (var matchedPerson of result) {
-          if( isSamePerson(person, matchedPerson) ){
+          if( isSamePerson(person, matchedPerson) > personUtils.minScoreSamePerson ){
             found = true;
             break;
           }
