@@ -23,3 +23,4 @@ console.log("alba y alba jose manuel", "alba y alba jose manuel de", personUtils
 console.log("aguillon guzman miguel", "guillen guzman miguel", personUtils.sameName("aguillon guzman miguel", "guillen guzman miguel"))
 console.log("alvarez sergio antonio", "alvarez vazquez sergio antonio", personUtils.sameName("alvarez sergio antonio", "alvarez vazquez sergio antonio"))
 console.log("arroyo munoz jose tomas", "garrido munoz jose tomas", personUtils.sameName("arroyo munoz jose tomas", "garrido munoz jose tomas"))
+console.log("castaneda gilberto m", "moreno castaneda gilberto", personUtils.sameName("castaneda gilberto m", "moreno castaneda gilberto"))
