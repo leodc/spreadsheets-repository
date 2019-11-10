@@ -243,7 +243,13 @@ function getNameList(max, callback){
 function searchPersonsByNames(prop, callback) {
   console.log("searching person by names", prop);
 
-  var query = {$text: { $search: prop.names }};
+  var query = {
+    "$or": []
+  };
+
+  if( prop.names !== "" ){
+    query["$text"] = { $search: prop.names };
+  }
 
   // custom filters
   for (var customFilter of prop.filters) {
@@ -252,15 +258,15 @@ function searchPersonsByNames(prop, callback) {
     var filterOpt = aux[1].trim();
     var filterValue = aux[2].trim();
 
-    if( !query[filterProp] ){
-      query[filterProp] = {};
-    }
-
     if (filterOpt == "$regex"){
-      query[filterProp][filterOpt] = new RegExp(".*" + filterValue + ".*", "i");
+      query["$or"].push({ [filterProp]: {"$regex": new RegExp(".*" + filterValue + ".*", "i")} });
     }else{
-      query[filterProp][filterOpt] = filterValue;
+      query["$or"].push({ [filterProp]: {[filterOpt]: isNaN(filterValue) ? filterValue:parseFloat(filterValue)} });
     }
+  }
+
+  if( query["$or"].length === 0 ){
+    delete query["$or"];
   }
 
   MongoClient.connect(mongoUrl, { useNewUrlParser: true }, function(connectErr, client) {
