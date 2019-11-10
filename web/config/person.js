@@ -4,7 +4,7 @@ var path = require("path");
 
 vm.runInThisContext( fs.readFileSync( path.join(__dirname, "../client/js/fuzziac.js") ) );
 
-var minScoreSamePerson = 1.7;
+var minScoreSamePerson = 1.75;
 
 function sameName(a, b){
   a = a.toLowerCase();
@@ -27,7 +27,7 @@ function sameName(a, b){
   var maxLength = namesA.length > namesB.length ? namesA.length:namesB.length;
   var included;
   for (var i = 0; i < maxLength; i++) {
-    if( typeof namesA !== "string" || typeof namesB !== "string" ){
+    if( typeof namesA[i] !== "string" || typeof namesB[i] !== "string" ){
       included = false;
       break;
     }
