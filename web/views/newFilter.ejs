@@ -1,25 +1,51 @@
 <div class="modal" id="newFilterModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Agregar nuevo filtro</h5>
-            </div>
-            <div class="modal-body">
-                <div class="input-group">
-                    <div class="input-group-prepend" style="width:100px;"><span class="input-group-text">Propiedad</span></div><input class="form-control" id="newFilterProperty" type="text" placeholder="sociodemographic.gender" /></div>
-                <div class="input-group">
-                    <div class="input-group-prepend" style="width:100px;"><span class="input-group-text">Operación</span></div><select class="form-control" id="newFilterOpt"><option value="$regex">Contiene</option><option value="$lte"><=</option><option value="$gte">>=</option><option value="$lt"><</option><option value="$gt">></option><option value="$eq">=</option></select></div>
-                <div
-                    class="input-group">
-                    <div class="input-group-prepend"><span class="input-group-text" style="width:100px;">Valor</span></div><input class="form-control" id="newFilterValue" type="text" placeholder="1" /></div>
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Agregar nuevo filtro</h5>
+      </div>
+
+      <div class="modal-body">
+        <div class="input-group">
+          <div class="input-group-prepend" style="width:100px;">
+            <span class="input-group-text">Propiedad</span>
+          </div>
+          <input class="form-control" id="newFilterProperty" type="text" placeholder="sociodemographic.gender" />
         </div>
-        <div class="modal-footer"><button class="btn btn-secondary btn-sm" type="button" data-dismiss="modal">Cerrar</button><button class="btn btn-primary btn-sm" type="button" onclick="createNewFilter();">Agregar filtro</button></div>
+        <div class="input-group">
+          <div class="input-group-prepend" style="width:100px;">
+            <span class="input-group-text">Operación</span>
+          </div>
+          <select class="form-control" id="newFilterOpt">
+            <option value="$regex">Contiene</option>
+            <option value="$lte"><=</option>
+            <option value="$gte">>=</option>
+            <option value="$lt"><</option>
+            <option value="$gt">></option>
+            <option value="$eq" selected>=</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <div class="input-group-prepend">
+            <span class="input-group-text" style="width:100px;">Valor</span>
+          </div>
+          <input class="form-control" id="newFilterValue" type="text" placeholder="1" />
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary btn-sm" type="button" data-dismiss="modal">Cerrar</button>
+        <button class="btn btn-primary btn-sm" type="button" onclick="createNewFilter();">Agregar filtro</button>
+      </div>
     </div>
+  </div>
 </div>
-</div>
+
 <script>
-    $("#newFilterModal").on("show.bs.modal", function(e) {
-        $("#newFilterProperty").val("");
-        $("#newFilterValue").val("");
-    });
+  $("#newFilterModal").on("shown.bs.modal", function(e) {
+    $("#newFilterProperty").val("");
+    $("#newFilterValue").val("");
+
+    $("#newFilterProperty").focus();
+  });
 </script>

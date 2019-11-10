@@ -87,7 +87,7 @@ function createNewFilter(){
   var condition = prop + ":" + opt + ":" + value;
   var contidionHtml = prop + " " + $("#newFilterOpt").find("option:selected").text() + " " + value;
 
-  var html = "<span class='badge badge-primary filter-mongo' data-condition='" + condition + "' onclick='this.remove();' style='cursor:pointer;'> " + contidionHtml +   " &nbsp;<i class='fas fa-times' style='color:red;'></i></span>&nbsp;"
+  var html = "<span class='badge badge-info filter-mongo' data-condition='" + condition + "' onclick='this.remove();' style='cursor:pointer;'> " + contidionHtml +   " &nbsp;<i class='fas fa-times' style='color:red;'></i></span>&nbsp;"
 
   $("#filterList").append(html);
 
@@ -106,11 +106,13 @@ function searchPersons(callback){
     filters.push($(this).data("condition"));
   });
 
-  $("#searchNames").html("");
+  // $("#searchNames").html("");
 
   if(!callback){
     callback = function(persons){
       console.log(persons);
+
+      $("#searchNames").html("");
 
       for (var person of persons) {
         html = "<li>";
@@ -119,6 +121,8 @@ function searchPersons(callback){
 
         $("#searchNames").append(html);
       }
+
+      $("#searchCounter").html( persons.length + " personas encontradas");
       $("#loadingModal").modal("hide");
     };
   }
