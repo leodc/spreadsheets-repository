@@ -24,3 +24,6 @@ console.log("aguillon guzman miguel", "guillen guzman miguel", personUtils.sameN
 console.log("alvarez sergio antonio", "alvarez vazquez sergio antonio", personUtils.sameName("alvarez sergio antonio", "alvarez vazquez sergio antonio"))
 console.log("arroyo munoz jose tomas", "garrido munoz jose tomas", personUtils.sameName("arroyo munoz jose tomas", "garrido munoz jose tomas"))
 console.log("castaneda gilberto m", "moreno castaneda gilberto", personUtils.sameName("castaneda gilberto m", "moreno castaneda gilberto"))
+console.log("garcia romero luis", "garcia romero luisa", personUtils.sameName("garcia romero luis", "garcia romero luisa"))
+console.log("silva santillan maria luz", "ortega tlapa luz maria", personUtils.sameName("silva santillan maria luz", "ortega tlapa luz maria"))
+console.log("aguilar francisco d", "bastida medina daniel", personUtils.sameName("aguilar francisco d", "bastida medina daniel"))

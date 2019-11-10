@@ -32,8 +32,17 @@ function sameName(a, b){
       break;
     }
 
-    included = namesA[i].length > namesB[i].length ? namesA[i].startsWith( namesB[i].replace(/[^a-zñ]/g,"") ):namesB[i].startsWith( namesA[i].replace(/[^a-zñ]/g,"") );
-    if(!included){
+    if( namesA[i] === namesB[i] ){
+      continue;
+    }
+
+    if( namesA[i].length < 4 || namesB[i].length < 4 ){
+      included = namesA[i].length > namesB[i].length ? namesA[i].startsWith( namesB[i].replace(/[^a-zñ]/g,"") ):namesB[i].startsWith( namesA[i].replace(/[^a-zñ]/g,"") );
+      if(!included){
+        break;
+      }
+    }else if ( namesA[i] !== namesB[i] ) {
+      included = false;
       break;
     }
   }
