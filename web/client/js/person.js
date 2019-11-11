@@ -50,7 +50,7 @@ $(function(){
           var header = headers[i];
 
           if( header.endsWith( utils.referenceSuffix ) ){
-            html += `<td class='text-capitalize'><a href='/persona/` + String(record[header]).toLowerCase().trim() + `' target='_blank'>` + record[header] + `</a></td>`;
+            html += `<td class='text-capitalize'><a href='/persona/` + utils.cleanName(String(record[header])) + `' target='_blank'>` + record[header] + `</a></td>`;
           }else if ( header.endsWith( utils.linkSuffix ) ) {
             html += `<td class='text-capitalize'><a href='` + String(record[header]).toLowerCase().trim() + `' target='_blank'>` + record[header] + `</a></td>`;
           }else{
