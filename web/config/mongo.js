@@ -244,7 +244,7 @@ function searchPersonsByNames(prop, callback) {
   console.log("searching person by names", prop);
 
   var query = {
-    "$or": []
+    "$and": []
   };
 
   if( prop.names !== "" ){
@@ -259,14 +259,14 @@ function searchPersonsByNames(prop, callback) {
     var filterValue = aux[2].trim();
 
     if (filterOpt == "$regex"){
-      query["$or"].push({ [filterProp]: {"$regex": new RegExp(".*" + filterValue + ".*", "i")} });
+      query["$and"].push({ [filterProp]: {"$regex": new RegExp(".*" + filterValue + ".*", "i")} });
     }else{
-      query["$or"].push({ [filterProp]: {[filterOpt]: isNaN(filterValue) ? filterValue:parseFloat(filterValue)} });
+      query["$and"].push({ [filterProp]: {[filterOpt]: isNaN(filterValue) ? filterValue:parseFloat(filterValue)} });
     }
   }
 
-  if( query["$or"].length === 0 ){
-    delete query["$or"];
+  if( query["$and"].length === 0 ){
+    delete query["$and"];
   }
 
   MongoClient.connect(mongoUrl, { useNewUrlParser: true }, function(connectErr, client) {
