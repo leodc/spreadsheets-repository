@@ -24,7 +24,7 @@ $(function(){
 
       html += `
       <div class="p-3 jumbotron" style="overflow-x:auto;">
-        <h2 class='text-capitalize text-muted'>` + property + `</h2>
+        <h2 class='text-muted'>` + property + `</h2>
       `;
 
       for (var record of person[property]) {
@@ -50,11 +50,11 @@ $(function(){
           var header = headers[i];
 
           if( header.endsWith( utils.referenceSuffix ) ){
-            html += `<td class='text-capitalize'><a href='/persona/` + utils.cleanName(String(record[header])) + `' target='_blank'>` + record[header] + `</a></td>`;
+            html += `<td class=''><a href='/persona/` + utils.cleanName(String(record[header])) + `' target='_blank'>` + record[header] + `</a></td>`;
           }else if ( header.endsWith( utils.linkSuffix ) ) {
-            html += `<td class='text-capitalize'><a href='` + String(record[header]).toLowerCase().trim() + `' target='_blank'>` + record[header] + `</a></td>`;
+            html += `<td class=''><a href='` + String(record[header]).toLowerCase().trim() + `' target='_blank'>` + record[header] + `</a></td>`;
           }else{
-            html += `<td class='text-capitalize'>` + record[header] + `</td>`;
+            html += `<td class=''>` + record[header] + `</td>`;
           }
         }
 
